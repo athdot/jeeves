@@ -2,6 +2,7 @@ import datetime
 import threading
 import pandas as pd
 import json
+import os
 
 import alpaca_trade_api as tradeapi
 import time
@@ -10,7 +11,6 @@ from alpaca_trade_api.rest import TimeFrame
 API_KEY = "PKLCL1FFMZJBOHQBSNWU"
 API_SECRET = "RanK5eafcR1V9v1rz4GPqjvtCcBlrf1m5viZnRqx"
 APCA_API_BASE_URL = "https://paper-api.alpaca.markets"
-
 
 class LongShort:
   def __init__(self):
@@ -43,6 +43,7 @@ class LongShort:
       self.alpaca.cancel_order(order.id)
 
     # Wait for market to open.
+    self.synch_time()
     print("Waiting for market to open...")
     tAMO = threading.Thread(target=self.awaitMarketOpen)
     tAMO.start()
@@ -93,8 +94,16 @@ class LongShort:
       currTime = clock.timestamp.replace(tzinfo=datetime.timezone.utc).timestamp()
       timeToOpen = int((openingTime - currTime) / 60)
       print(str(timeToOpen) + " minutes til market open.")
+      
       time.sleep(60)
       isOpen = self.alpaca.get_clock().is_open
+      
+  def synch_time(self):
+      print("Synching Time...")
+      os.system("sudo systemctl stop ntp.service")
+      os.system("sudo ntpd -gpc /etc/ntpd.conf")
+      os.system("sudo systemctl start ntp.service")
+      print("Time Synched.")
 
   def rebalance(self):
     tRerank = threading.Thread(target=self.rerank)
