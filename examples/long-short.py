@@ -1,6 +1,7 @@
 import datetime
 import threading
 import pandas as pd
+import json
 
 import alpaca_trade_api as tradeapi
 import time
@@ -280,7 +281,13 @@ class LongShort:
                                   pd.Timestamp('now').date(), limit=1,
                                   adjustment='raw')
 
-      totalPrice += bars[stock][0].c
+      # stock_index = 0
+      #for i in bars:
+      #    if i[0] == stock[0]:
+      #        break
+      #    stock_index = stock_index + 1
+    
+      totalPrice += bars[0].c
     resp.append(totalPrice)
 
   # Submit a batch order that returns completed and uncompleted orders.
@@ -323,8 +330,19 @@ class LongShort:
                                   pd.Timestamp('now').date(),
                                   pd.Timestamp('now').date(), limit=length,
                                   adjustment='raw')
-      self.allStocks[i][1] = (bars[stock[0]][len(bars[stock[0]]) - 1].c - bars[stock[0]][0].o) / bars[stock[0]][0].o
-
+      bar_count = 0
+      for i in bars:
+          bar_count = bar_count + 1
+    
+      stock_index = 0
+      for i in self.allStocks:
+          if i[0] == stock[0]:
+              break
+          stock_index = stock_index + 1
+    
+      if bar_count > 0:
+          self.allStocks[stock_index][1] = (bars[bar_count - 1].c - bars[0].o) / bars[0].o
+      
   # Mechanism used to rank the stocks, the basis of the Long-Short Equity Strategy.
   def rank(self):
     # Ranks all stocks by percent change over the past 10 minutes (higher is better).
