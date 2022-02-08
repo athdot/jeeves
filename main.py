@@ -11,6 +11,8 @@ def main():
     global api
     api = tradeapi.REST()
 
+    # Es esso asi
+
     stream = Stream(
         os.environ["APCA_API_KEY_ID"],
         os.environ["APCA_API_SECRET_KEY"],
