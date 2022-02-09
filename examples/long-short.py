@@ -8,13 +8,13 @@ import alpaca_trade_api as tradeapi
 import time
 from alpaca_trade_api.rest import TimeFrame
 
-API_KEY = "PKZNDYOEAEPT2M5Z17X1"
-API_SECRET = "KPOMOoQb0e5yz4YVTDf1rfoQDYlHF2CcDGqOVPC7"
-APCA_API_BASE_URL = "https://paper-api.alpaca.markets"
-
 class LongShort:
   def __init__(self):
-    self.alpaca = tradeapi.REST(API_KEY, API_SECRET, APCA_API_BASE_URL, 'v2')
+    init_alpaca_environ()
+    self.alpaca = tradeapi.REST(os.environ["APCA_API_KEY_ID"],
+                                os.environ["APCA_API_SECRET_KEY"],
+                                os.environ["APCA_API_BASE_URL"],
+                                'v2')
 
     stockUniverse = ['DOMO', 'TLRY', 'SQ', 'MRO', 'AAPL', 'GM', 'SNAP', 'SHOP',
                      'SPLK', 'BA', 'AMZN', 'SUI', 'SUN', 'TSLA', 'CGC', 'SPWR',
@@ -362,6 +362,13 @@ class LongShort:
 
     # Sort the stocks in place by the percent change field (marked by pc).
     self.allStocks.sort(key=lambda x: x[1])
+
+# Modify our API settings
+def init_alpaca_environ():
+    params = json.load(open("params.json"))
+    os.environ["APCA_API_BASE_URL"] = str(params["alpaca_url"])
+    os.environ["APCA_API_KEY_ID"] = str(params["alpaca_public"])
+    os.environ["APCA_API_SECRET_KEY"] = str(params["alpaca_private"])
 
 # Run the LongShort class
 ls = LongShort()
