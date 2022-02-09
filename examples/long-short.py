@@ -8,8 +8,8 @@ import alpaca_trade_api as tradeapi
 import time
 from alpaca_trade_api.rest import TimeFrame
 
-API_KEY = "PKLCL1FFMZJBOHQBSNWU"
-API_SECRET = "RanK5eafcR1V9v1rz4GPqjvtCcBlrf1m5viZnRqx"
+API_KEY = "PKZNDYOEAEPT2M5Z17X1"
+API_SECRET = "KPOMOoQb0e5yz4YVTDf1rfoQDYlHF2CcDGqOVPC7"
 APCA_API_BASE_URL = "https://paper-api.alpaca.markets"
 
 class LongShort:
@@ -18,8 +18,9 @@ class LongShort:
 
     stockUniverse = ['DOMO', 'TLRY', 'SQ', 'MRO', 'AAPL', 'GM', 'SNAP', 'SHOP',
                      'SPLK', 'BA', 'AMZN', 'SUI', 'SUN', 'TSLA', 'CGC', 'SPWR',
-                     'NIO', 'CAT', 'MSFT', 'PANW', 'OKTA', 'TWTR', 'TM', 'RTN',
-                     'ATVI', 'GS', 'BAC', 'MS', 'TWLO', 'QCOM', ]
+                     'NIO', 'CAT', 'MSFT', 'PANW', 'OKTA', 'TWTR', 'TM',
+                     'ATVI', 'GS', 'BAC', 'MS', 'TWLO', 'QCOM', 'GLD', ]
+    
     # Format the allStocks variable for use in the class.
     self.allStocks = []
     for stock in stockUniverse:
