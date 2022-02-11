@@ -38,16 +38,6 @@ class LongShort:
     self.timeToClose = None
 
   def run(self):
-    # Top text
-    print("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n")
-    
-    print("JEEVES")
-    
-    print(os.environ["JEEVES_VERSION"])
-    
-    print("Automated Trading and Portfolio Management Script for the Raspberry PI")
-    print("© 2022, Charles Graham. All rights reserved.")
-
     # First, cancel any existing orders so they don't impact our buying power.
     orders = self.alpaca.list_orders(status="open")
     for order in orders:
@@ -55,11 +45,7 @@ class LongShort:
 
     # Wait for market to open.
     total_equity = float(self.alpaca.get_account().equity)
-    
     os.environ["PDT_COMPLIANT"] = str(total_equity < 25000.0)
-    print("\nFree Equity: $" + str(total_equity))
-    
-    print("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
     self.synch_time()
     
     print("Waiting for market to open...")
