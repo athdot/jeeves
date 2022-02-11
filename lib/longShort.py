@@ -1,7 +1,6 @@
 import datetime
 import threading
 import pandas as pd
-import json
 import os
 
 import alpaca_trade_api as tradeapi
@@ -12,7 +11,6 @@ short_position_ratio = 0.3
 
 class LongShort:
   def __init__(self):
-    init_alpaca_environ()
     self.alpaca = tradeapi.REST(os.environ["APCA_API_KEY_ID"],
                                 os.environ["APCA_API_SECRET_KEY"],
                                 os.environ["APCA_API_BASE_URL"],
@@ -40,13 +38,30 @@ class LongShort:
     self.timeToClose = None
 
   def run(self):
+    # Top text
+    print("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n")
+    
+    print("JEEVES")
+    
+    print(os.environ["JEEVES_VERSION"])
+    
+    print("Automated Trading and Portfolio Management Script for the Raspberry PI")
+    print("© 2022, Charles Graham. All rights reserved.")
+
     # First, cancel any existing orders so they don't impact our buying power.
     orders = self.alpaca.list_orders(status="open")
     for order in orders:
       self.alpaca.cancel_order(order.id)
 
     # Wait for market to open.
+    total_equity = float(self.alpaca.get_account().equity)
+    
+    os.environ["PDT_COMPLIANT"] = str(total_equity < 25000.0)
+    print("\nFree Equity: $" + str(total_equity))
+    
+    print("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
     self.synch_time()
+    
     print("Waiting for market to open...")
     tAMO = threading.Thread(target=self.awaitMarketOpen)
     tAMO.start()
@@ -63,7 +78,7 @@ class LongShort:
       self.timeToClose = closingTime - currTime
 
       if(self.timeToClose < (60 * 15)):
-        if os.environ["PDT_COMPLIANT"] == False:
+        if os.environ["PDT_COMPLIANT"] == "False":
           # Close all positions when 15 minutes til market close.
           print("Market closing soon.  Closing positions.")
             
@@ -99,17 +114,15 @@ class LongShort:
       openingTime = clock.next_open.replace(tzinfo=datetime.timezone.utc).timestamp()
       currTime = clock.timestamp.replace(tzinfo=datetime.timezone.utc).timestamp()
       timeToOpen = int((openingTime - currTime) / 60)
-      print(str(timeToOpen) + " minutes til market open.")
+      print("Time until market opens: [" + str(int(timeToOpen / 60)) + ":" + str(timeToOpen % 60) + "]")
       
       time.sleep(60)
       isOpen = self.alpaca.get_clock().is_open
       
   def synch_time(self):
-      print("Synching Time...")
       os.system("sudo systemctl stop ntp.service")
       os.system("sudo ntpd -gpc /etc/ntpd.conf")
       os.system("sudo systemctl start ntp.service")
-      print("Time Synched.")
 
   def rebalance(self):
     tRerank = threading.Thread(target=self.rerank)
@@ -295,12 +308,6 @@ class LongShort:
                                   pd.Timestamp('now').date(),
                                   pd.Timestamp('now').date(), limit=1,
                                   adjustment='raw')
-
-      # stock_index = 0
-      #for i in bars:
-      #    if i[0] == stock[0]:
-      #        break
-      #    stock_index = stock_index + 1
     
       totalPrice += bars[0].c
     resp.append(totalPrice)
@@ -367,15 +374,3 @@ class LongShort:
 
     # Sort the stocks in place by the percent change field (marked by pc).
     self.allStocks.sort(key=lambda x: x[1])
-
-# Modify our API settings
-def init_alpaca_environ():
-    params = json.load(open("params.json"))
-    os.environ["APCA_API_BASE_URL"] = str(params["alpaca_url"])
-    os.environ["APCA_API_KEY_ID"] = str(params["alpaca_public"])
-    os.environ["APCA_API_SECRET_KEY"] = str(params["alpaca_private"])
-    os.environ["PDT_COMPLIANT"] = str(params["pdt_compliant"])
-
-# Run the LongShort class
-ls = LongShort()
-ls.run()
