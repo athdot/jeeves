@@ -1,5 +1,5 @@
 # Jeeves
-v1.2.0
+### v1.2.0
 
 Python Auto-Trader with Alpaca API
 
