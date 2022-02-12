@@ -4,6 +4,7 @@ import os
 import sys
 import alpaca_trade_api as tradeapi
 import utils
+from datetime import date
 
 def main():
     # Set our global python variables for all of our child scripts
@@ -43,7 +44,7 @@ def print_header(strat):
     print(os.environ["JEEVES_VERSION"])
     
     print("Automated Trading and Portfolio Management Script for the Raspberry PI")
-    print("© 2022, Charles Graham. All rights reserved.")
+    print("© " + str(date.today().year) + ", Charles Graham. All rights reserved.")
     
     total_equity = float(alpaca.get_account().equity)
     
