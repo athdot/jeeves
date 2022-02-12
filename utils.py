@@ -5,7 +5,7 @@ error_notif = "/!\\"
 
 def p_error(printErr):
     # Get substring length for one line
-    printErr = printErr.upper()
+    # printErr = printErr.upper()
     sub_len = len(horiz_seperator) - len(error_notif) * 2 - 2 # 2 are spaces
     i = 0
     while i < len(printErr):

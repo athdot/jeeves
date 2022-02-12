@@ -4,23 +4,27 @@ import os
 import sys
 import alpaca_trade_api as tradeapi
 import utils
+import glob
+
 from datetime import date
+from os.path import exists
 
 stockUniverse = ['DOMO', 'TLRY', 'SQ', 'MRO', 'AAPL', 'GM', 'SNAP', 'SHOP',
                  'SPLK', 'BA', 'AMZN', 'SUI', 'SUN', 'TSLA', 'CGC', 'SPWR',
                  'NIO', 'CAT', 'MSFT', 'PANW', 'OKTA', 'TWTR', 'TM',
                  'ATVI', 'GS', 'BAC', 'MS', 'TWLO', 'QCOM', 'GLD', ]
 
+# Algorithm name, no .py
+algorithm = "lpLongShort"
+
 def main():
     # Set our global python variables for all of our child scripts
-    algorithm = "longShort"
-    
     init_alpaca_environ()
     print_header(algorithm + ".py") 
     
     # Run investment strategy
-    ls = eval(algorithm).TradeAlgo()
-    ls.run()
+    algo = eval(algorithm).TradeAlgo()
+    algo.run()
 
 # Modify our API settings
 def init_alpaca_environ():
@@ -40,6 +44,9 @@ def init_alpaca_environ():
     
     # Turn our stock list into an os variable
     os.environ["STOCK_UNIVERSE"] = ','.join(stockUniverse)
+    
+def existant_algo(name):
+    return exists("lib/" + name + ".py")
 
 def print_header(strat):
     alpaca = tradeapi.REST(os.environ["APCA_API_KEY_ID"],
@@ -63,4 +70,19 @@ def print_header(strat):
     
     utils.p_sep()
 
-main()
+if existant_algo(algorithm):
+    main()
+else:
+    utils.p_sep()
+    utils.p_error("ERROR: MISSING DEPENDANCY")
+    utils.p_error("> 'lib/" + algorithm + ".py' DOES NOT EXIST")
+    utils.p_error("> Please use an existant algorithm and rerun".upper())
+    utils.p_error(" ")
+    utils.p_error("EXISTING ALGORITHMS:")
+    
+    files = glob.glob("lib/*.py")
+    for file in files:
+        if file != "lib/__init__.py":
+            utils.p_error("> " + str(file))
+    
+    utils.p_sep()
