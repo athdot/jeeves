@@ -106,9 +106,10 @@ class LongShort:
       isOpen = self.alpaca.get_clock().is_open
       
   def synch_time(self):
-      os.system("sudo systemctl stop ntp.service")
-      os.system("sudo ntpd -gpc /etc/ntpd.conf")
-      os.system("sudo systemctl start ntp.service")
+      # os.system("sudo systemctl stop ntp.service")
+      # os.system("sudo ntpd -gpc /etc/ntpd.conf")
+      # os.system("sudo systemctl start ntp.service")
+      return
 
   def rebalance(self):
     tRerank = threading.Thread(target=self.rerank)
