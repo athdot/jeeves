@@ -1,4 +1,4 @@
-from lib import longShort
+from lib import *
 import json
 import os
 import sys
@@ -6,13 +6,20 @@ import alpaca_trade_api as tradeapi
 import utils
 from datetime import date
 
+stockUniverse = ['DOMO', 'TLRY', 'SQ', 'MRO', 'AAPL', 'GM', 'SNAP', 'SHOP',
+                 'SPLK', 'BA', 'AMZN', 'SUI', 'SUN', 'TSLA', 'CGC', 'SPWR',
+                 'NIO', 'CAT', 'MSFT', 'PANW', 'OKTA', 'TWTR', 'TM',
+                 'ATVI', 'GS', 'BAC', 'MS', 'TWLO', 'QCOM', 'GLD', ]
+
 def main():
     # Set our global python variables for all of our child scripts
+    algorithm = "longShort"
+    
     init_alpaca_environ()
-    print_header("longShort.py")
+    print_header(algorithm + ".py") 
     
     # Run investment strategy
-    ls = longShort.LongShort()
+    ls = eval(algorithm).TradeAlgo()
     ls.run()
 
 # Modify our API settings
@@ -30,12 +37,15 @@ def init_alpaca_environ():
     version = open("README.md", 'r')
     version = version.readline()[9:]
     os.environ["JEEVES_VERSION"] = str(version)
+    
+    # Turn our stock list into an os variable
+    os.environ["STOCK_UNIVERSE"] = ','.join(stockUniverse)
 
 def print_header(strat):
     alpaca = tradeapi.REST(os.environ["APCA_API_KEY_ID"],
-                                os.environ["APCA_API_SECRET_KEY"],
-                                os.environ["APCA_API_BASE_URL"],
-                                'v2')
+                           os.environ["APCA_API_SECRET_KEY"],
+                           os.environ["APCA_API_BASE_URL"],
+                           'v2')
     
     utils.p_sep()
     

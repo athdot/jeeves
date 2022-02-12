@@ -10,17 +10,14 @@ from alpaca_trade_api.rest import TimeFrame
 
 short_position_ratio = 0.3
 
-class LongShort:
+class TradeAlgo:
   def __init__(self):
     self.alpaca = tradeapi.REST(os.environ["APCA_API_KEY_ID"],
                                 os.environ["APCA_API_SECRET_KEY"],
                                 os.environ["APCA_API_BASE_URL"],
                                 'v2')
 
-    stockUniverse = ['DOMO', 'TLRY', 'SQ', 'MRO', 'AAPL', 'GM', 'SNAP', 'SHOP',
-                     'SPLK', 'BA', 'AMZN', 'SUI', 'SUN', 'TSLA', 'CGC', 'SPWR',
-                     'NIO', 'CAT', 'MSFT', 'PANW', 'OKTA', 'TWTR', 'TM',
-                     'ATVI', 'GS', 'BAC', 'MS', 'TWLO', 'QCOM', 'GLD', ]
+    stockUniverse = os.environ["STOCK_UNIVERSE"].split(",")
     
     # Format the allStocks variable for use in the class.
     self.allStocks = []
@@ -108,29 +105,39 @@ class LongShort:
   def awaitMarketOpen(self):
     isOpen = self.alpaca.get_clock().is_open
     while(not isOpen):
-      clock = self.alpaca.get_clock()
-      openingTime = clock.next_open.replace(tzinfo=datetime.timezone.utc).timestamp()
-      currTime = clock.timestamp.replace(tzinfo=datetime.timezone.utc).timestamp()
-      timeToOpen = int((openingTime - currTime) / 60)
-      print("Time until market opens: [", end="")
-      if int(timeToOpen / (60 * 24)) > 0:
-          print(str(int(timeToOpen / (60 * 24))) + " day", end="")
-          if int(timeToOpen / (60 * 24)) > 1:
-              print("s", end="")
-          print(", ", end="")
-      if int(timeToOpen / 60) % 24 > 0:
-          print(str(int(timeToOpen / 60) % 24) + " hour", end="")
-          if int(timeToOpen / 60) % 24 > 1:
-              print("s", end="")
-          print(", and ", end="")
-      if timeToOpen % 60 > 0:
-          print(str(timeToOpen % 60) + " minute", end="")
-          if timeToOpen % 60 > 1:
-              print("s", end="")
-      print("]")
+        clock = self.alpaca.get_clock()
+        openingTime = clock.next_open.replace(tzinfo=datetime.timezone.utc).timestamp()
+        currTime = clock.timestamp.replace(tzinfo=datetime.timezone.utc).timestamp()
+        timeToOpen = int((openingTime - currTime) / 60)
+        print("Time until market opens: [", end="")
+        time_list = []
+        if int(timeToOpen / (60 * 24)) > 0:
+            time_list.append(str(int(timeToOpen / (60 * 24))) + " day")
+            if int(timeToOpen / (60 * 24)) > 1:
+                time_list[len(time_list) - 1] = time_list[len(time_list) - 1] + "s"
+        if int(timeToOpen / 60) % 24 > 0:
+            time_list.append(str(int(timeToOpen / 60) % 24) + " hour")
+            if int(timeToOpen / 60) % 24 > 1:
+                time_list[len(time_list) - 1] = time_list[len(time_list) - 1] + "s"
+        if timeToOpen % 60 > 0:
+            time_list.append(str(timeToOpen % 60) + " minute")
+            if timeToOpen % 60 > 1:
+                time_list[len(time_list) - 1] = time_list[len(time_list) - 1] + "s"
+                
+        if len(time_list) > 2:
+            time_list[len(time_list) - 1] = "and " + time_list[len(time_list) - 1]
+            time_list = [", " + s for s in time_list]
+            time_list[0] = time_list[0][2:]
+        else:
+            if len(time_list) > 1:
+                time_list[len(time_list) - 1] = " and " + time_list[len(time_list) - 1]
+            
+        print("".join(time_list), end="")
+            
+        print("]")
       
-      time.sleep(60)
-      isOpen = self.alpaca.get_clock().is_open
+        time.sleep(60)
+        isOpen = self.alpaca.get_clock().is_open
       
   def synch_time(self):
       # os.system("sudo systemctl stop ntp.service")
