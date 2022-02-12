@@ -3,6 +3,7 @@ import json
 import os
 import sys
 import alpaca_trade_api as tradeapi
+import utils
 
 def main():
     # Set our global python variables for all of our child scripts
@@ -35,9 +36,9 @@ def print_header(strat):
                                 os.environ["APCA_API_BASE_URL"],
                                 'v2')
     
-    print("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n")
+    utils.p_sep()
     
-    print("JEEVES")
+    print("\nJEEVES")
     
     print(os.environ["JEEVES_VERSION"])
     
@@ -47,8 +48,8 @@ def print_header(strat):
     total_equity = float(alpaca.get_account().equity)
     
     print("\nFree Equity: $" + str(total_equity))
-    print("Algorithm: " + str(strat))
+    print("Algorithm: " + str(strat) + "\n")
     
-    print("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+    utils.p_sep()
 
 main()

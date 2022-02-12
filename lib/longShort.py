@@ -2,6 +2,7 @@ import datetime
 import threading
 import pandas as pd
 import os
+import utils
 
 import alpaca_trade_api as tradeapi
 import time
@@ -48,6 +49,11 @@ class LongShort:
     os.environ["PDT_COMPLIANT"] = str(total_equity < 25000.0)
     self.synch_time()
     
+    if os.environ["PDT_COMPLIANT"] == "True":
+      utils.p_error("NOTIFICATION: RUNNING IN LOW-CAPITAL MODE")
+      utils.p_error("ACCOUNT EQUITY: [$" + str(total_equity) + "]")
+      utils.p_sep()
+    
     print("Waiting for market to open...")
     tAMO = threading.Thread(target=self.awaitMarketOpen)
     tAMO.start()
@@ -80,11 +86,17 @@ class LongShort:
             tSubmitOrder.start()
             tSubmitOrder.join()
         else:
-            print("PDT Protection for less than $25k in account, will close positions on market open.")
+            utils.p_error("PDT Restriction is preventing us closing positions, will close in the morning")
 
         # Run script again after market close for next trading day.
         print("Sleeping until market close (15 minutes).")
         time.sleep(60 * 15)
+        
+        print("Waiting for market to open...")
+        tAMO = threading.Thread(target=self.awaitMarketOpen)
+        tAMO.start()
+        tAMO.join()
+        print("Market opened.")
       else:
         # Rebalance the portfolio.
         tRebalance = threading.Thread(target=self.rebalance)
@@ -100,7 +112,22 @@ class LongShort:
       openingTime = clock.next_open.replace(tzinfo=datetime.timezone.utc).timestamp()
       currTime = clock.timestamp.replace(tzinfo=datetime.timezone.utc).timestamp()
       timeToOpen = int((openingTime - currTime) / 60)
-      print("Time until market opens: [" + str(int(timeToOpen / 60)) + ":" + str(timeToOpen % 60) + "]")
+      print("Time until market opens: [", end="")
+      if int(timeToOpen / (60 * 24)) > 0:
+          print(str(int(timeToOpen / (60 * 24))) + " day", end="")
+          if int(timeToOpen / (60 * 24)) > 1:
+              print("s", end="")
+          print(", ", end="")
+      if int(timeToOpen / 60) % 24 > 0:
+          print(str(int(timeToOpen / 60) % 24) + " hour", end="")
+          if int(timeToOpen / 60) % 24 > 1:
+              print("s", end="")
+          print(", and ", end="")
+      if timeToOpen % 60 > 0:
+          print(str(timeToOpen % 60) + " minute", end="")
+          if timeToOpen % 60 > 1:
+              print("s", end="")
+      print("]")
       
       time.sleep(60)
       isOpen = self.alpaca.get_clock().is_open
