@@ -22,8 +22,8 @@ In order to execute our algorithms, an accout with Alpaca Algorithmic Traders is
 
 ```
 {
-    "alpaca_public":"XXXXXXXXXXXXXXXX"
-    "alpaca_private":"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+    "alpaca_public":"XXXXXXXXXXXXXXXX",
+    "alpaca_private":"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
     "alpaca_url":"https://paper-api.alpaca.markets"
 }
 ```
