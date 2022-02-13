@@ -16,10 +16,5 @@ Variables of Note:
 - os.environ["APCA_API_SECRET_KEY"]
 - os.environ["STOCK_UNIVERSE"]
 
-### Author
-**Charles Graham**
-
-* [github/athdot](https://github.com/athdot/)
-
 ### License
 © 2022, Charles Graham. All rights reserved.
