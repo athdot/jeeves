@@ -15,7 +15,7 @@ stockUniverse = ['DOMO', 'TLRY', 'SQ', 'MRO', 'AAPL', 'GM', 'SNAP', 'SHOP',
                  'ATVI', 'GS', 'BAC', 'MS', 'TWLO', 'QCOM', 'GLD', ]
 
 # Algorithm name, no .py
-algorithm = "lpLongShort"
+algorithm = "longShort"
 
 def main():
     # Set our global python variables for all of our child scripts
