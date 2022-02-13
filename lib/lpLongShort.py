@@ -2,7 +2,7 @@ import datetime
 import threading
 import pandas as pd
 import os
-import utils
+from utils import utils
 
 import alpaca_trade_api as tradeapi
 import time

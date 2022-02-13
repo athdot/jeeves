@@ -3,7 +3,7 @@ import json
 import os
 import sys
 import alpaca_trade_api as tradeapi
-import utils
+from utils import utils
 import glob
 
 from datetime import date

@@ -1,5 +1,0 @@
-Git Password:
-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
-
-Funny command:
-lxterminal -t 'JEEVES' -e bash 'main.sh'
