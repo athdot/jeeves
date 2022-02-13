@@ -10,7 +10,7 @@ To create a new algorithm, you must do 3 things
 - Add a .run() function to be invocated
 - Place function into the lib/ folder
 
-Variables of Note:
+#### Variables of Note:
 - os.environ["APCA_API_BASE_URL"]
 - os.environ["APCA_API_KEY_ID"]
 - os.environ["APCA_API_SECRET_KEY"]
