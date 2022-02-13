@@ -21,3 +21,28 @@ def p_error(printErr):
     
 def p_sep():
     print(horiz_seperator)
+    
+def p_time(timeToOpen):
+    time_list = []
+    if int(timeToOpen / (60 * 24)) > 0:
+        time_list.append(str(int(timeToOpen / (60 * 24))) + " day")
+        if int(timeToOpen / (60 * 24)) > 1:
+            time_list[len(time_list) - 1] = time_list[len(time_list) - 1] + "s"
+    if int(timeToOpen / 60) % 24 > 0:
+        time_list.append(str(int(timeToOpen / 60) % 24) + " hour")
+        if int(timeToOpen / 60) % 24 > 1:
+            time_list[len(time_list) - 1] = time_list[len(time_list) - 1] + "s"
+    if timeToOpen % 60 > 0:
+        time_list.append(str(timeToOpen % 60) + " minute")
+        if timeToOpen % 60 > 1:
+            time_list[len(time_list) - 1] = time_list[len(time_list) - 1] + "s"
+                    
+    if len(time_list) > 2:
+        time_list[len(time_list) - 1] = "and " + time_list[len(time_list) - 1]
+        time_list = [", " + s for s in time_list]
+        time_list[0] = time_list[0][2:]
+    else:
+        if len(time_list) > 1:
+            time_list[len(time_list) - 1] = " and " + time_list[len(time_list) - 1]
+            
+    return "".join(time_list)
