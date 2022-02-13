@@ -19,7 +19,7 @@ Variables of Note:
 ### Author
 **Charles Graham**
 
-*[github/athdot](https://github.com/athdot/)
+* [github/athdot](https://github.com/athdot/)
 
 ### License
 © 2022, Charles Graham. All rights reserved.
