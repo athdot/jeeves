@@ -15,3 +15,5 @@ Variables of Note:
 - os.environ["APCA_API_KEY_ID"]
 - os.environ["APCA_API_SECRET_KEY"]
 - os.environ["STOCK_UNIVERSE"]
+
+© 2022, Charles Graham. All rights reserved.
