@@ -46,3 +46,6 @@ def p_time(timeToOpen):
             time_list[len(time_list) - 1] = " and " + time_list[len(time_list) - 1]
             
     return "".join(time_list)
+
+def synch_time():
+    return

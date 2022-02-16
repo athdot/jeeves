@@ -44,7 +44,7 @@ class TradeAlgo:
     # Wait for market to open.
     total_equity = float(self.alpaca.get_account().equity)
     os.environ["PDT_COMPLIANT"] = str(total_equity < 25000.0)
-    self.synch_time()
+    utils.synch_time()
     
     if os.environ["PDT_COMPLIANT"] == "True":
       utils.p_error("NOTIFICATION: RUNNING IN LOW-CAPITAL MODE")
@@ -114,12 +114,6 @@ class TradeAlgo:
       
         time.sleep(60)
         isOpen = self.alpaca.get_clock().is_open
-      
-  def synch_time(self):
-      # os.system("sudo systemctl stop ntp.service")
-      # os.system("sudo ntpd -gpc /etc/ntpd.conf")
-      # os.system("sudo systemctl start ntp.service")
-      return
 
   def rebalance(self):
     tRerank = threading.Thread(target=self.rerank)
@@ -350,12 +344,12 @@ class TradeAlgo:
                                   pd.Timestamp('now').date(), limit=length,
                                   adjustment='raw')
       bar_count = 0
-      for i in bars:
+      for j in bars:
           bar_count = bar_count + 1
     
       stock_index = 0
-      for i in self.allStocks:
-          if i[0] == stock[0]:
+      for j in self.allStocks:
+          if j[0] == stock[0]:
               break
           stock_index = stock_index + 1
     
