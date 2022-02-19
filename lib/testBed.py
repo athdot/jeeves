@@ -3,7 +3,7 @@ import threading
 import pandas as pd
 import os
 from scipy import stats
-from utils import utils
+from utils import *
 
 import alpaca_trade_api as tradeapi
 import time

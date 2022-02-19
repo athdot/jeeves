@@ -3,11 +3,15 @@ import json
 import os
 import sys
 import alpaca_trade_api as tradeapi
-from utils import utils
+from utils import *
 import glob
 
 from datetime import date
 from os.path import exists
+
+abspath = os.path.abspath(__file__)
+dname = os.path.dirname(abspath)
+os.chdir(dname)
 
 stockUniverse = ['DOMO', 'TLRY', 'SQ', 'MRO', 'AAPL', 'GM', 'SNAP', 'SHOP',
                  'SPLK', 'BA', 'AMZN', 'SUI', 'SUN', 'TSLA', 'CGC', 'SPWR',
