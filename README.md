@@ -1,7 +1,11 @@
-# Jeeves v1.3.1 - "Smith"
+# Jeeves v1.4.1 - "Pisspot"
 Python Auto-Trader with Alpaca API
 
 Compatable trading algorithms and scripts are stored in our lib/ folder
+
+### Recent Version Notes
+- Addition of candlestick analysis functionality beta
+- Adding of test toolkit tools to test effectiveness and functionality
 
 ### Algorithm Creation
 
