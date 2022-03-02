@@ -18,8 +18,15 @@ stockUniverse = ['DOMO', 'TLRY', 'SQ', 'MRO', 'AAPL', 'GM', 'SNAP', 'SHOP',
                  'NIO', 'CAT', 'MSFT', 'PANW', 'OKTA', 'TWTR', 'TM',
                  'ATVI', 'GS', 'BAC', 'MS', 'TWLO', 'QCOM', 'GLD', ]
 
+alternateStockUniverse = [
+    'AG', 'WPM', 'HL', 'SLV', 'SVM', 'EXK', 'FSM', 'SSRM', 
+    'PAAS', 'NEM', 'SCCO', 'FCX', 'VALE', 'RIO', 'TRQ', 'BHP',
+    'ERO', 'CS', 'COPX', 'EQX', 'TECK', 'NUE', 'AR', 'AU',
+    'GFI', 'SBSW', 'EGO', 'CDE', 'BTG', 'PLG', 'HL', 'CENX'
+]
+
 # Algorithm name, no .py
-algorithm = "testBed"
+algorithm = "lpLongShortBeta"
 
 def main():
     # Set our global python variables for all of our child scripts
@@ -49,7 +56,23 @@ def init_alpaca_environ():
     os.environ["JEEVES_VERSION"] = str(version)
     
     # Turn our stock list into an os variable
-    os.environ["STOCK_UNIVERSE"] = ','.join(stockUniverse)
+    alpaca = tradeapi.REST(os.environ["APCA_API_KEY_ID"],
+                           os.environ["APCA_API_SECRET_KEY"],
+                           os.environ["APCA_API_BASE_URL"],
+                           'v2')
+
+    positions = alpaca.list_positions()
+
+    alt_list = False
+    for p in positions:
+        if stockUniverse.count(p.symbol) > 0:
+            alt_list = True
+            break
+
+    if alt_list:
+        os.environ["STOCK_UNIVERSE"] = ','.join(alternateStockUniverse)
+    else:
+        os.environ["STOCK_UNIVERSE"] = ','.join(stockUniverse)
     
 def existant_algo(name):
     return exists("lib/" + name + ".py")

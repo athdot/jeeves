@@ -1,11 +1,11 @@
-# Jeeves v1.4.1 - "Pisspot"
+# Jeeves v2.0.3 - "Zelenskyy"
 Python Auto-Trader with Alpaca API
 
 Compatable trading algorithms and scripts are stored in our lib/ folder
 
 ### Recent Version Notes
-- Addition of candlestick analysis functionality beta
-- Adding of test toolkit tools to test effectiveness and functionality
+- Further Candlestick chart analysis work
+- Official Version release with functional new algo ```lpLongShortBeta.py``` which is perhaps the first iteration of an algo to work with low capital. As it stands now, it organizes stocks based on day trend. Can be improved with Candlesticks later, however
 
 ### Algorithm Creation
 

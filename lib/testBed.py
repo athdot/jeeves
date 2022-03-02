@@ -26,14 +26,14 @@ class TradeAlgo:
         utils.p_sep()
         
         # self.run_candle_test()
-        self.run_tests(30)
+        self.run_tests(180)
 
         utils.p_sep()
         utils.p_error("OPERATION COMPLETE")
         utils.p_sep()
         
     def run_tests(self, period):
-        run_num = 3 # 4
+        run_num = 6 # 4 normally, 3 is good for the simple test, 6 is pretty good
         
         # Header
         print("Day-Period: " + str(run_num))
@@ -44,24 +44,31 @@ class TradeAlgo:
         print("Running Tests, starting " + str(period) + " day(s) ago..")
         p_accuracy = list() # List
         weekend_offset = 0
-        for day in range(1, period + 1):
-            print("Executing Day " + str(day) + "...")
+        for day in range(0, period):
             predictions = [] # List of predictions per stock for the day
             actuals = [] # List of actual stock movements
             
             day_today = pd.Timestamp('now').date() - pd.Timedelta(days = day + weekend_offset)
-            
+
+            weekday_count = -1            
             if day_today.weekday() > 4:
                 weekend_offset = weekend_offset + 2
-            
+                weekday_count = (day_today.weekday() - 2) % 7
+            else:
+                weekday_count = day_today.weekday()
+
+            weekdays = ["Monday","Tuesday","Wednesday","Thursday","Friday"]
+
+            print("Executing Day " + str(day) + ", " + str(weekdays[weekday_count]) + "...")
+
             for stock_name in self.allStocks:
                 local_bars = self.get_bars(stock_name, run_num, day + weekend_offset)
-                
+        
                 # Generate prediction
-                local_perdiction = self.simple_dir(local_bars)
+                local_perdiction = self.d_trend_line(local_bars)
                 
                 # Flip, betting on volitility
-                local_perdiction = -local_perdiction
+                # local_perdiction = -local_perdiction
 
                 if local_perdiction > 0:
                     local_perdiction = "P"
@@ -103,10 +110,12 @@ class TradeAlgo:
 
     def get_bars(self, stock, period, hist_period):
         day = pd.Timestamp('now').date() - pd.Timedelta(days = (hist_period + 1))
+
         bars = self.alpaca.get_bars(stock, TimeFrame.Day,
-                                    day - pd.Timedelta(days = 1 + period + 2 * int(period / 7 + 1)),
+                                    day - pd.Timedelta(days = 2 + period + 2 * int(period / 7 + 1)),
                                     day,
                                     adjustment='raw')
+
         bar_count = 0
         for bar in bars:
             bar_count = bar_count + 1
@@ -134,6 +143,48 @@ class TradeAlgo:
         slope, intercept, r_value, p_value, std_err = stats.linregress(mean_val_y, mean_val_x)
         
         return slope
+
+    def d_trend_line(self, bars):
+        # Similar to trend_line, but the trend starts on the interval with the best r_value
+        # List of median values between day open and close
+        med_values = []
+        value_axis = []
+        for bar_val in range(0, len(bars)):
+            bar = bars[bar_val]
+            # med_values.extend([bar.o, bar.c, bar.h, bar.l])
+            # value_axis.extend([bar_val, bar_val, bar_val, bar_val])
+            med_values.append((bar.c - bar.o) / 2 + bar.o)
+            value_axis.append(bar_val)
+
+        prime_value = [-1,-1, 0] # Start index, R-Value
+        for bar in range(0, len(bars) - 2):
+            # Essentially check list for slope and r_value and keep going through until we have the best r value
+            slope, intercept, r_value, p_value, std_err = stats.linregress(value_axis[bar:], med_values[bar:])
+
+            if r_value * r_value > prime_value[1] or prime_value[0] == -1:
+                # if r_value * r_value < 0.85:
+                #     slope = -slope 
+                # Control: 47.44%
+                # R^2 > 0.85 Flip: 50.77%
+                # R^2 > 0.5 Flip: 51.66%
+                #
+                # R^2 < 0.15 Flip: 47.55%
+                # R^2 < 0.5 Flip: 48%
+                # R^2 < 0.75 Flip: 48.33%
+
+                slope = -slope
+
+                prime_value = [bar, r_value * r_value, slope]
+                # print(std_err)
+
+        # if prime_value[0] == -1:
+        #     utils.p_error("ERROR: ONLY 1 VALUE IN med_values")
+        #     utils.p_error("LENGTH OF BARS: " + str(len(bars)))
+
+        # We have the best prime value!
+        # print("=-=")
+        # print(prime_value)
+        return prime_value[2]
     
     def delta_pctg(self, bars):
         # Trendline
