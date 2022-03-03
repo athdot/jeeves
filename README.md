@@ -1,4 +1,4 @@
-# Jeeves v2.1.0 - "Zelenskyy"
+# Jeeves v2.1.1 - "Zelenskyy"
 Python Auto-Trader with Alpaca API
 
 Compatable trading algorithms and scripts are stored in our lib/ folder
@@ -6,6 +6,7 @@ Compatable trading algorithms and scripts are stored in our lib/ folder
 ### Recent Version Notes
 - Further Candlestick chart analysis work
 - Official Version release with functional new algo ```lpLongShortBeta.py``` which is perhaps the first iteration of an algo to work with low capital. As it stands now, it organizes stocks based on day trend. Can be improved with Candlesticks later, however
+- Addition of a report with Mailjet API
 
 ### Algorithm Creation
 
@@ -28,7 +29,11 @@ In order to execute our algorithms, an accout with Alpaca Algorithmic Traders is
 {
     "alpaca_public":"XXXXXXXXXXXXXXXX",
     "alpaca_private":"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-    "alpaca_url":"https://paper-api.alpaca.markets"
+    "alpaca_url":"https://paper-api.alpaca.markets",
+    "mailjet_public":"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "mailjet_private":"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "mailjet_sender":"XXXXXXXXXXXXXXXX",
+    "mailjet_reciever":"XXXXXXXXXXXXXXXX"
 }
 ```
 Inclusion of this file will allow each script to connect and interact with your Alpaca account, in order to recieve market data and total account equity, but also complete market_orders and manage portfolio standings.
