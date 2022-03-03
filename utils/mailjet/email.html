@@ -1,0 +1,154 @@
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        #positiontable {
+            font-family: Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        #positiontable td,
+        #positiontable th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        #positiontable tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #positiontable tr:hover {
+            background-color: #ddd;
+        }
+
+        #positiontable th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #e8ce3c;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div style='background-color: #ffde26; width: 80%; top: 0px; position: relative; margin: auto;'>
+        <div style='padding: 10%'>
+            <div style='background-color: #fff; padding: 10px'>
+
+                <img src='cid:id1'
+                    alt='img'
+                    style='position:relative; display: block; margin-left: auto; margin-right: auto;  width:25%; padding: 10%' />
+
+                <h3 style='margin: 0px'>RPi Daily Report {date}</h3>
+                <!-- Equity -->
+
+                <hr>
+                <div id='maincontent' style='padding: 5px; margin: auto;'>
+
+                    <div style='margin:auto; width: 50%; text-align: center; padding-top: 10px'>
+                        <h1 style='display: inline;'>Total Equity</h1>
+
+                        <div
+                            style='display: inline; background-color: #e8ce3c; padding: 15px; padding-top: 24px; margin-left: 10px'>
+                            <h1 style='display: inline; padding: 0px; margin: 0px;'>{current_eq}</h1>
+                        </div>
+
+                        <h2 style='font-weight: normal;'><b>Yesterdays Equity:</b> {past_eq}</h2>
+                        <h2 style='font-weight: normal;'><b>Gain/Loss: {eq_pct_change}</b></h2>
+
+                    </div>
+                    <!-- Positions -->
+                    <hr>
+                    <!-- Portfolio Performance Chart -->
+                    <!-- TODO -->
+
+                    <div style='width: 100%; display: table'>
+                        <div id='positions_list' style='display: table-row;'>
+                            <div style='width: 50%; display: table-cell; padding: 5px'>
+                                <table style='width:100%' id='positiontable'>
+                                    <caption style='padding: 5px'>Shorted Positions</caption>
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th>Count</th>
+                                        <th>% Change</th>
+                                    </tr>
+                                    {short_list}
+                                </table>
+
+                            </div>
+                            <div style='width: 50%; display: table-cell; padding: 5px'>
+
+                                <table style='width:100%' id='positiontable'>
+                                    <caption style='padding: 5px'>Longed Positions</caption>
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th>Count</th>
+                                        <th>% Change</th>
+                                    </tr>
+                                    {long_list}
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <hr style='width: 5%;'>
+                    <hr style='width: 5%;'>
+                    <table style='width:50%; margin: auto;' id='positiontable'>
+                        <caption style='padding: 5px'>Top 5 Stocks</caption>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Count</th>
+                            <th>% Change</th>
+                        </tr>
+                        {top_five}
+                    </table>
+                    <br>
+                    <table style='width:50%; margin: auto;' id='positiontable'>
+                        <caption style='padding: 5px'>Bottom 5 Stocks</caption>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Count</th>
+                            <th>% Change</th>
+                        </tr>
+                        {bottom_five}
+                    </table>
+                    <br>
+
+                    <table style='width:75%; margin: auto;' id='positiontable'>
+                        <caption style='padding: 5px'>Portfolio Performance</caption>
+                        <tr>
+                            <th>Positions</th>
+                            <th>Count</th>
+                            <th>Gain/Loss</th>
+                        </tr>
+                        {portfolio_summary}
+                    </table>
+                    <br>
+
+                    <div style='margin:auto;text-align: center; padding: 40px'>
+                        <h1 style='display: inline;'>Mean Change</h1>
+
+                        <div
+                            style='display: inline; background-color: #e8ce3c; padding: 15px; padding-top: 24px; margin-left: 10px'>
+                            <h1 style='display: inline; padding: 0px; margin: 0px;'>{overall_change}</h1>
+                        </div>
+                    </div>
+                    <br>
+                    <!-- End positions -->
+                </div>
+                <!-- Footer Content -->
+                <div style='text-align: left; float: left; color: #555'>
+                    © Charles Graham. All Rights Reserved.
+                </div>
+                <div style='text-align: right; color: #555'>
+                    Data Courtesy of Alpaca API
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,4 +1,4 @@
-# Jeeves v2.0.3 - "Zelenskyy"
+# Jeeves v2.1.0 - "Zelenskyy"
 Python Auto-Trader with Alpaca API
 
 Compatable trading algorithms and scripts are stored in our lib/ folder

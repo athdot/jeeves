@@ -3,6 +3,7 @@ import threading
 import pandas as pd
 import os
 from utils import utils
+from utils import mailjet
 
 import alpaca_trade_api as tradeapi
 import time
@@ -18,7 +19,13 @@ class TradeAlgo:
         self.var_init()
 
     def var_init(self):
+        positions = self.alpaca.list_positions()
+
         stockUniverse = os.environ["STOCK_UNIVERSE"].split(",")
+        for p in positions:
+            if stockUniverse.count(p.symbol) > 0:
+                stockUniverse = os.environ["ALT_STOCK_UNIVERSE"].split(",")
+                break
         
         # Format the allStocks variable for use in the class.
         self.allStocks = []
@@ -47,9 +54,14 @@ class TradeAlgo:
         self.take_profit = 0.15 # Close a trade if we profit by 15%
         self.profit_margins = [] # List of bounds for each trade
 
+        # Message
+        self.init_equity = 0.0
+
     def run(self):
         utils.p_error("NOTIFICATION: RUNNING A LOW-POWER LONG-SHORT ALGO")
         utils.p_sep()
+
+        self.init_equity = float(self.alpaca.get_account().equity)
         
         # Run each day
         while True:
@@ -60,8 +72,9 @@ class TradeAlgo:
             tAMO.join()
             print("Market opened.")
 
-            # Determine amount to long/short based on total stock price of each bucket.
+            # Refresh equity totals
             self.currentEquity = self.getUsableEquity()
+            self.init_equity = float(self.alpaca.get_account().equity)
 
             self.shortAmount = self.currentEquity * self.short_position_ratio
             self.longAmount = self.currentEquity - self.shortAmount
@@ -86,7 +99,7 @@ class TradeAlgo:
                     time.sleep(60 * 5)
                 
                     self.opening = True
-                    print("Market Close: " + str(clock.timestamp))
+                    print("Market Close: " + str(clock.timestamp).split()[0])
                     utils.p_sep()
                     self.var_init()
                     break
@@ -144,16 +157,28 @@ class TradeAlgo:
     # Wait for market to open.
     def awaitMarketOpen(self):
         isOpen = self.alpaca.get_clock().is_open
+        clock = self.alpaca.get_clock()
+        closeTime = clock.timestamp.replace(tzinfo=datetime.timezone.utc).timestamp()
+
         while(not isOpen):
             clock = self.alpaca.get_clock()
             openingTime = clock.next_open.replace(tzinfo=datetime.timezone.utc).timestamp()
             currTime = clock.timestamp.replace(tzinfo=datetime.timezone.utc).timestamp()
             timeToOpen = int((openingTime - currTime) / 60)
+            timeSinceClose = int((currTime - closeTime) / 60)
             
             print("Time until market opens: [" + utils.p_time(timeToOpen) + "]")
       
+            if int(timeSinceClose / 60) % 24 == 4 and timeToOpen % 60 == 30:
+                print("Sent Report!")
+                self.submitReport()
+
             time.sleep(60)
             isOpen = self.alpaca.get_clock().is_open
+
+            if isOpen:
+                # Do operations at 9:31 AM
+                time.sleep(60)
 
     # Update our profit margins stop-loss list on a new purchase
     def update_profits(self, stock, side):
@@ -213,7 +238,8 @@ class TradeAlgo:
                 stock_list.append(stock)
                 stock_change.append(-quantity)
 
-        print("We are taking an additional short position in: " + str(position_list_p))
+        if len(position_list_p) > 0:
+            print("We are taking an additional short position in: " + str(position_list_p))
 
         # Check our longs
         position_list_p = []
@@ -226,7 +252,8 @@ class TradeAlgo:
                 stock_list.append(stock)
                 stock_change.append(quantity)
 
-        print("We are taking an additional long position in: " + str(position_list_p))
+        if len(position_list_p) > 0:
+            print("We are taking an additional long position in: " + str(position_list_p))
 
         if len(stock_list) > 0:
             # We have some changes to make!
@@ -429,7 +456,25 @@ class TradeAlgo:
             local_perdiction = self.d_trend_line(local_bars)
 
             self.allStocks[i][1] = local_perdiction
-        
+    
+    def submitReport(self):
+        current_equity = float(self.alpaca.get_account().equity)
+
+        positions = self.alpaca.list_positions()
+        short_list = []
+        long_list = []
+
+        for position in positions:
+            if position.side == "long":
+                # Its a long
+                long_list.append([position.symbol, int(position.qty), float(position.unrealized_plpc), float(position.unrealized_pl)])
+            else:
+                # Its a short
+                short_list.append([position.symbol, int(position.qty), float(position.unrealized_plpc), float(position.unrealized_pl)])
+
+        # [symbol, qty, pct_change, price_change_total]
+        mailjet.day_report([current_equity, self.init_equity], short_list, long_list)
+
     # Submit an order if quantity is above 0.
     def submitOrder(self, qty, stock, side, resp):
         if(qty > 0):

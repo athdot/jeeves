@@ -32,7 +32,7 @@ def main():
     # Set our global python variables for all of our child scripts
     init_alpaca_environ()
     print_header(algorithm + ".py") 
-    
+
     # Run investment strategy
     algo = eval(algorithm).TradeAlgo()
     algo.run()
@@ -51,6 +51,11 @@ def init_alpaca_environ():
     os.environ["APCA_API_KEY_ID"] = str(params["alpaca_public"])
     os.environ["APCA_API_SECRET_KEY"] = str(params["alpaca_private"])
     
+    os.environ["MAILJET_API_KEY_ID"] = str(params["mailjet_public"])
+    os.environ["MAILJET_API_SECRET_KEY"] = str(params["mailjet_private"])
+    os.environ["MAILJET_API_SENDER"] = str(params["mailjet_sender"])
+    os.environ["MAILJET_API_RECIEVER"] = str(params["mailjet_reciever"])
+    
     version = open("README.md", 'r')
     version = version.readline()[9:]
     os.environ["JEEVES_VERSION"] = str(version)
@@ -61,18 +66,8 @@ def init_alpaca_environ():
                            os.environ["APCA_API_BASE_URL"],
                            'v2')
 
-    positions = alpaca.list_positions()
-
-    alt_list = False
-    for p in positions:
-        if stockUniverse.count(p.symbol) > 0:
-            alt_list = True
-            break
-
-    if alt_list:
-        os.environ["STOCK_UNIVERSE"] = ','.join(alternateStockUniverse)
-    else:
-        os.environ["STOCK_UNIVERSE"] = ','.join(stockUniverse)
+    os.environ["ALT_STOCK_UNIVERSE"] = ','.join(alternateStockUniverse)
+    os.environ["STOCK_UNIVERSE"] = ','.join(stockUniverse)
     
 def existant_algo(name):
     return exists("lib/" + name + ".py")
