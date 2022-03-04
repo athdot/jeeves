@@ -17,6 +17,7 @@ def day_report(equity_list, short_list, long_list):
     # Variable management
     today = date.today()
     t_date = today.strftime("%m/%d/%y")
+    t_year = today.strftime("%Y")
 
     p_change = round((equity_list[0] / equity_list[1] - 1) * 100, 2)
     c_change = "green"
@@ -37,6 +38,7 @@ def day_report(equity_list, short_list, long_list):
     data = data.replace("{past_eq}", "$" + "{0:.2f}".format(equity_list[1]))
     data = data.replace("{eq_pct_change}", "<p style='display: inline; color: " + c_change + ";'>" + p_change + "</p>")
     data = data.replace("{date}", t_date)
+    data = data.replace("{year}", t_year)
 
     # Parse the long and short data
     up1 = 0
@@ -52,11 +54,11 @@ def day_report(equity_list, short_list, long_list):
         if short[3] < 0:
             down1 = down1 + 1
             down2 = down2 + short[3]
-            d_insert += gen_tb("", "red", short[0], short[1], str(round(short[2], 2)) + "%")
+            d_insert += gen_tb("", "red", short[0], short[1], str(round(short[2] * 100, 2)) + "%")
         else:
             up1 = up1 + 1
             up2 = up2 + short[3]
-            d_insert += gen_tb("", "green", short[0], short[1], "+" + str(round(short[2], 2)) + "%")
+            d_insert += gen_tb("", "green", short[0], short[1], "+" + str(round(short[2] * 100, 2)) + "%")
     data = data.replace("{short_list}", d_insert)
 
     d_insert = ""
@@ -65,11 +67,11 @@ def day_report(equity_list, short_list, long_list):
         if long_var[3] < 0:
             down1 = down1 + 1
             down2 = down2 + long_var[3]
-            d_insert += gen_tb("", "red", long_var[0], long_var[1], str(round(long_var[2], 2)) + "%")
+            d_insert += gen_tb("", "red", long_var[0], long_var[1], str(round(long_var[2] * 100, 2)) + "%")
         else:
             up1 = up1 + 1
             up2 = up2 + long_var[3]
-            d_insert += gen_tb("", "green", long_var[0], long_var[1], "+" + str(round(long_var[2], 2)) + "%")
+            d_insert += gen_tb("", "green", long_var[0], long_var[1], "+" + str(round(long_var[2] * 100, 2)) + "%")
     data = data.replace("{long_list}", d_insert)
 
     d_insert = gen_tb("green", "", "Up", up1, "+$" + "{0:.2f}".format(up2))
@@ -91,9 +93,9 @@ def day_report(equity_list, short_list, long_list):
     stock_list_org = []
 
     for stock in long_list:
-        stock_list_org.append([stock[0], stock[3]])
+        stock_list_org.append([stock[0], stock[2]])
     for stock in short_list:
-        stock_list_org.append([stock[0], stock[3]])
+        stock_list_org.append([stock[0], stock[2]])
 
     stock_list_org.sort(key=lambda x: x[1])
     stock_list_org.reverse()
@@ -118,9 +120,9 @@ def day_report(equity_list, short_list, long_list):
                 pct = stock[2]
 
         if pct < 0:
-            d_insert += gen_tb("", "red", symbol, qty, str(round(pct, 2)) + "%")
+            d_insert += gen_tb("", "red", symbol, qty, str(round(pct * 100, 2)) + "%")
         else:
-            d_insert += gen_tb("", "green", symbol, qty, "+" + str(round(pct, 2)) + "%")
+            d_insert += gen_tb("", "green", symbol, qty, "+" + str(round(pct * 100, 2)) + "%")
 
     data = data.replace("{top_five}", d_insert)    
 
@@ -140,11 +142,65 @@ def day_report(equity_list, short_list, long_list):
                 pct = stock[2]
 
         if pct < 0:
-            d_insert += gen_tb("", "red", symbol, qty, str(round(pct, 2)) + "%")
+            d_insert += gen_tb("", "red", symbol, qty, str(round(pct * 100, 2)) + "%")
         else:
-            d_insert += gen_tb("", "green", symbol, qty, "+" + str(round(pct, 2)) + "%")
+            d_insert += gen_tb("", "green", symbol, qty, "+" + str(round(pct * 100, 2)) + "%")
 
     data = data.replace("{bottom_five}", d_insert)  
+
+    stock_list_org = []
+
+    for stock in long_list:
+        stock_list_org.append([stock[0], stock[3]])
+    for stock in short_list:
+        stock_list_org.append([stock[0], stock[3]])
+
+    stock_list_org.sort(key=lambda x: x[1])
+    stock_list_org.reverse()
+
+    d_insert = ""
+    for i in range(0, max):
+        symbol = stock_list_org[i][0]
+        qty = 0
+        pct = 0
+
+        for stock in short_list:
+            if stock[0] == symbol:
+                qty = stock[1]
+                pct = stock[3]
+        for stock in long_list:
+            if stock[0] == symbol:
+                qty = stock[1]
+                pct = stock[3]
+
+        if pct < 0:
+            d_insert += gen_tb("", "red", symbol, qty, "-$" + "{0:.2f}".format(round(-pct, 2)))
+        else:
+            d_insert += gen_tb("", "green", symbol, qty, "+$" + "{0:.2f}".format(round(pct, 2)))
+
+    data = data.replace("{real_top_five}", d_insert)    
+
+    d_insert = ""
+    for i in range(len(stock_list_org) - max, len(stock_list_org)):
+        symbol = stock_list_org[i][0]
+        qty = 0
+        pct = 0
+
+        for stock in short_list:
+            if stock[0] == symbol:
+                qty = stock[1]
+                pct = stock[3]
+        for stock in long_list:
+            if stock[0] == symbol:
+                qty = stock[1]
+                pct = stock[3]
+
+        if pct < 0:
+            d_insert += gen_tb("", "red", symbol, qty, "-$" + "{0:.2f}".format(round(-pct, 2)))
+        else:
+            d_insert += gen_tb("", "green", symbol, qty, "-$" + "{0:.2f}".format(round(pct, 2)))
+
+    data = data.replace("{real_bottom_five}", d_insert)  
 
     mailjet_send(data, t_date)
 
@@ -194,13 +250,13 @@ def gen_tb(main_color, end_color, arg1, arg2, arg3):
     # <td>AAPL</td>
     # <td>-2</td>
     # <td>+0.05</td>
-    output += "<td>" + str(arg1) + "</td>"
-    output += "<td>" + str(arg2) + "</td>"
+    output += "<td style='text-align: left'>" + str(arg1) + "</td>"
+    output += "<td style='text-align: left'>" + str(arg2) + "</td>"
 
     if len(end_color) > 0:
-        output += "<td style='color: " + str(end_color) + "'>" + str(arg3) + "</td>"
+        output += "<td style='text-align: right; color: " + str(end_color) + "'>" + str(arg3) + "</td>"
     else:
-        output += "<td>" + str(arg3) + "</td>"
+        output += "<td style='text-align: right'>" + str(arg3) + "</td>"
 
     output += "</tr>"
     return output

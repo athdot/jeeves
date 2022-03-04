@@ -61,11 +61,6 @@ def init_alpaca_environ():
     os.environ["JEEVES_VERSION"] = str(version)
     
     # Turn our stock list into an os variable
-    alpaca = tradeapi.REST(os.environ["APCA_API_KEY_ID"],
-                           os.environ["APCA_API_SECRET_KEY"],
-                           os.environ["APCA_API_BASE_URL"],
-                           'v2')
-
     os.environ["ALT_STOCK_UNIVERSE"] = ','.join(alternateStockUniverse)
     os.environ["STOCK_UNIVERSE"] = ','.join(stockUniverse)
     

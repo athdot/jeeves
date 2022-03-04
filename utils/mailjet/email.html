@@ -1,4 +1,5 @@
 <html>
+
 <head>
     <style>
         body {
@@ -40,8 +41,7 @@
         <div style='padding: 10%'>
             <div style='background-color: #fff; padding: 10px'>
 
-                <img src='cid:id1'
-                    alt='img'
+                <img src='cid:id1' alt='img'
                     style='position:relative; display: block; margin-left: auto; margin-right: auto;  width:25%; padding: 10%' />
 
                 <h3 style='margin: 0px'>RPi Daily Report {date}</h3>
@@ -97,25 +97,53 @@
                     </div>
                     <hr style='width: 5%;'>
                     <hr style='width: 5%;'>
-                    <table style='width:50%; margin: auto;' id='positiontable'>
-                        <caption style='padding: 5px'>Top 5 Stocks</caption>
-                        <tr>
-                            <th>Symbol</th>
-                            <th>Count</th>
-                            <th>% Change</th>
-                        </tr>
-                        {top_five}
-                    </table>
-                    <br>
-                    <table style='width:50%; margin: auto;' id='positiontable'>
-                        <caption style='padding: 5px'>Bottom 5 Stocks</caption>
-                        <tr>
-                            <th>Symbol</th>
-                            <th>Count</th>
-                            <th>% Change</th>
-                        </tr>
-                        {bottom_five}
-                    </table>
+                    <div style='width: 100%; display: table'>
+                        <div id='positions_list' style='display: table-row;'>
+                            <div style='width: 50%; display: table-cell; padding: 5px'>
+                                <table style='width:90%; margin: auto;' id='positiontable'>
+                                    <caption style='padding: 5px'>Top 5 Stocks</caption>
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th>Count</th>
+                                        <th>% Change</th>
+                                    </tr>
+                                    {top_five}
+                                </table>
+                                <br>
+                                <table style='width:90%; margin: auto;' id='positiontable'>
+                                    <caption style='padding: 5px'>Bottom 5 Stocks</caption>
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th>Count</th>
+                                        <th>% Change</th>
+                                    </tr>
+                                    {bottom_five}
+                                </table>
+                                <br>
+                            </div>
+                            <div style='width: 50%; display: table-cell; padding: 5px'>
+                                <table style='width:90%; margin: auto;' id='positiontable'>
+                                    <caption style='padding: 5px'>Real Top 5 Stocks</caption>
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th>Count</th>
+                                        <th>Price Change</th>
+                                    </tr>
+                                    {real_top_five}
+                                </table>
+                                <br>
+                                <table style='width:90%; margin: auto;' id='positiontable'>
+                                    <caption style='padding: 5px'>Real Bottom 5 Stocks</caption>
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th>Count</th>
+                                        <th>Price Change</th>
+                                    </tr>
+                                    {real_bottom_five}
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                     <br>
 
                     <table style='width:75%; margin: auto;' id='positiontable'>
@@ -129,7 +157,7 @@
                     </table>
                     <br>
 
-                    <div style='margin:auto;text-align: center; padding: 40px'>
+                    <div style='margin:auto; text-align: center; padding: 40px'>
                         <h1 style='display: inline;'>Mean Change</h1>
 
                         <div
@@ -142,7 +170,7 @@
                 </div>
                 <!-- Footer Content -->
                 <div style='text-align: left; float: left; color: #555'>
-                    © Charles Graham. All Rights Reserved.
+                    © {year}, Charles Graham. All Rights Reserved.
                 </div>
                 <div style='text-align: right; color: #555'>
                     Data Courtesy of Alpaca API
@@ -151,4 +179,5 @@
         </div>
     </div>
 </body>
+
 </html>

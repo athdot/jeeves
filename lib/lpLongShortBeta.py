@@ -169,7 +169,8 @@ class TradeAlgo:
             
             print("Time until market opens: [" + utils.p_time(timeToOpen) + "]")
       
-            if int(timeSinceClose / 60) % 24 == 4 and timeToOpen % 60 == 30:
+            # 4 hours
+            if int(timeSinceClose / 60) == 4 and timeSinceClose % 60 == 0:
                 print("Sent Report!")
                 self.submitReport()
 
@@ -310,6 +311,23 @@ class TradeAlgo:
 
         short_prices = []
         long_prices = []
+
+        # Set long and short ammount to reflect the situation if there are few shorts and longs
+        if len(self.long) < 6:
+            temp_ratio = ((1 - self.short_position_ratio) * len(self.long) / 6) * 0.8 + 0.2
+            print("Long Positions have length of [" + str(len(self.long)) + "], expanding short lists capital to " + str((1 - temp_ratio) * 100) + "%")
+            self.longAmount = self.currentEquity * temp_ratio
+            self.shortAmount = self.currentEquity - self.longAmount
+
+        if len(self.short) < 6:
+            temp_ratio = self.short_position_ratio * len(self.short) / 6
+            print("Short Positions have length of [" + str(len(self.short)) + "], shrinking short lists capital to " + str(temp_ratio * 100) + "%")
+            self.shortAmount = self.currentEquity * temp_ratio
+            self.longAmount = self.currentEquity - self.shortAmount
+
+        print("Long Capital Allocation: $" + str(self.longAmount))
+        print("Short Capital Allocation: $" + str(self.shortAmount))
+
 
         # Get price numbers for shorts and longs
         for stock in self.short:
