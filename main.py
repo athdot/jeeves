@@ -85,7 +85,8 @@ def print_header(strat):
     total_equity = float(alpaca.get_account().equity)
     
     print("\nFree Equity: $" + str(total_equity))
-    print("Algorithm: " + str(strat) + "\n")
+    print("Day Trades: " + str(alpaca.get_account().daytrade_count))
+    print("\nAlgorithm: " + str(strat) + "\n")
     
     utils.p_sep()
 

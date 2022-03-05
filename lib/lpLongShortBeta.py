@@ -19,6 +19,7 @@ class TradeAlgo:
 
         # Message
         self.init_equity = -1.0
+        self.allow_liquidations = False # True means that we care about stop-loss
 
         self.var_init()
 
@@ -498,6 +499,20 @@ class TradeAlgo:
 
     # Submit an order if quantity is above 0.
     def submitOrder(self, qty, stock, side, resp):
+        my_acc = self.alpaca.get_account()
+
+        if my_acc.daytrade_count >= 3 and not self.allow_liquidations:
+            # ALMOST MARKED AS PDT, NONO
+            positions = self.alpaca.list_positions()
+            for position in positions:
+                if position.symbol == stock:
+                    if (side == "buy" and position.side == "short") or (side == "sell" and position.side == "long"):
+                        print("Pushing up against PDT restrictions | " + str(qty) + " " + stock + " " + side + " | not completed.")
+                        resp.append(True)
+                        return
+                    else:
+                        break
+
         if(qty > 0):
             try:
                 self.alpaca.submit_order(stock, qty, side, "market", "day")
