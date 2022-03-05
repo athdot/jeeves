@@ -16,6 +16,10 @@ class TradeAlgo:
                                 os.environ["APCA_API_SECRET_KEY"],
                                 os.environ["APCA_API_BASE_URL"],
                                 'v2')
+
+        # Message
+        self.init_equity = -1.0
+
         self.var_init()
 
     def var_init(self):
@@ -54,14 +58,12 @@ class TradeAlgo:
         self.take_profit = 0.15 # Close a trade if we profit by 15%
         self.profit_margins = [] # List of bounds for each trade
 
-        # Message
-        self.init_equity = 0.0
-
     def run(self):
         utils.p_error("NOTIFICATION: RUNNING A LOW-POWER LONG-SHORT ALGO")
         utils.p_sep()
 
-        self.init_equity = float(self.alpaca.get_account().equity)
+        if self.init_equity == -1.0:
+            self.init_equity = float(self.alpaca.get_account().equity)
         
         # Run each day
         while True:
@@ -492,6 +494,7 @@ class TradeAlgo:
 
         # [symbol, qty, pct_change, price_change_total]
         mailjet.day_report([current_equity, self.init_equity], short_list, long_list)
+        self.init_equity = current_equity
 
     # Submit an order if quantity is above 0.
     def submitOrder(self, qty, stock, side, resp):

@@ -6,6 +6,7 @@ from datetime import timedelta
 
 import base64
 import os
+import warnings
 
 def gen_plot(y1, time_scale):
     market_open = datetime.now().replace(hour=7, minute=0, second=0)
@@ -13,10 +14,11 @@ def gen_plot(y1, time_scale):
     # x1 = [market_open + timedelta(minutes=i * time_scale) for i in range(int(11 * (60 / time_scale)))]
     # y1 = [i+random.gauss(0,1) for i,_ in enumerate(x1)]
 
-    x1 = [market_open + timedelta(minutes=i * time_scale) for i in range(len(data))]
+    x1 = [market_open + timedelta(minutes=i * time_scale) for i in range(len(y1))]
 
     dtFormat = mdates.DateFormatter('%H:%M')
 
+    warnings.filterwarnings("ignore")
     plt.figure(figsize=(8,5), dpi=120)
 
     plt.plot(x1, y1, color = "darkgoldenrod", label = "Equity")
