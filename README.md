@@ -1,12 +1,11 @@
-# Jeeves v2.1.1 - "Zelenskyy"
+# Jeeves v2.1.2 - "Zelenskyy"
 Python Auto-Trader with Alpaca API
 
 Compatable trading algorithms and scripts are stored in our lib/ folder
 
 ### Recent Version Notes
-- Further Candlestick chart analysis work
-- Official Version release with functional new algo ```lpLongShortBeta.py``` which is perhaps the first iteration of an algo to work with low capital. As it stands now, it organizes stocks based on day trend. Can be improved with Candlesticks later, however
-- Addition of a report with Mailjet API
+- Changes of ```lpLongShortBeta.py``` to allow account to bypass PDT restrictions by flip-flopping between which stock universe is being currently processed. Stocks are held for 24 hrs (72 hours on the weekend). With the current setup, considering no stock goes outside the stop-loss points, PDT lockdown should be avoided.
+- Addition of a reporting system with MailJet API, additionally with the inclusion of charts etc
 
 ### Algorithm Creation
 

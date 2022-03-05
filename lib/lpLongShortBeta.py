@@ -170,7 +170,7 @@ class TradeAlgo:
             print("Time until market opens: [" + utils.p_time(timeToOpen) + "]")
       
             # 4 hours
-            if int(timeSinceClose / 60) == 4 and timeSinceClose % 60 == 0:
+            if self.currentEquity > 0 and int(timeSinceClose / 60) == 4 and timeSinceClose % 60 == 0:
                 print("Sent Report!")
                 self.submitReport()
 
