@@ -58,10 +58,14 @@ class TradeAlgo:
         self.stop_loss = 0.05 # Close a trade if we lose money by 5%
         self.take_profit = 0.15 # Close a trade if we profit by 15%
         self.profit_margins = [] # List of bounds for each trade
+        
+        self.pdt_counter = 0
 
     def run(self):
         utils.p_error("NOTIFICATION: RUNNING A LOW-POWER LONG-SHORT ALGO")
         utils.p_sep()
+        
+        self.do_reb = input("Run Rebalance on First Day? (y/n)\n")
 
         if self.init_equity == -1.0:
             self.init_equity = float(self.alpaca.get_account().equity)
@@ -83,9 +87,15 @@ class TradeAlgo:
             self.longAmount = self.currentEquity - self.shortAmount
 
             # Rebalancing portfolio on market open
-            tRebalance = threading.Thread(target=self.rebalance)
-            tRebalance.start()
-            tRebalance.join()
+            if self.do_reb == "y":
+                tRebalance = threading.Thread(target=self.rebalance)
+                tRebalance.start()
+                tRebalance.join()
+            else:
+                print("Skipped Initial Rebalance")
+                self.shortAmount = 0
+                self.longAmount = 0
+                self.do_reb = "y"
 
             d_reb = True
 
@@ -500,18 +510,23 @@ class TradeAlgo:
     # Submit an order if quantity is above 0.
     def submitOrder(self, qty, stock, side, resp):
         my_acc = self.alpaca.get_account()
+        
+        pdt_qualified = False
+        positions = self.alpaca.list_positions()
+        for position in positions:
+            if position.symbol == stock:
+                if (side == "buy" and position.side == "short") or (side == "sell" and position.side == "long"):
+                    pdt_qualified = True
+                    self.pdt_counter = self.pdt_counter + 1
+                else:
+                    break
 
-        if my_acc.daytrade_count >= 3 and not self.allow_liquidations:
+        # my_acc.daytrade_count
+        if self.pdt_counter >= 2 and my_acc.daytrade_count >= 3 and not self.allow_liquidations:
             # ALMOST MARKED AS PDT, NONO
-            positions = self.alpaca.list_positions()
-            for position in positions:
-                if position.symbol == stock:
-                    if (side == "buy" and position.side == "short") or (side == "sell" and position.side == "long"):
-                        print("Pushing up against PDT restrictions | " + str(qty) + " " + stock + " " + side + " | not completed.")
-                        resp.append(True)
-                        return
-                    else:
-                        break
+            print("Pushing up against PDT restrictions | " + str(qty) + " " + stock + " " + side + " | not completed.")
+            resp.append(True)
+            return
 
         if(qty > 0):
             try:
