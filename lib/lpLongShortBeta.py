@@ -64,8 +64,6 @@ class TradeAlgo:
     def run(self):
         utils.p_error("NOTIFICATION: RUNNING A LOW-POWER LONG-SHORT ALGO")
         utils.p_sep()
-        
-        self.do_reb = input("Run Rebalance on First Day? (y/n)\n")
 
         if self.init_equity == -1.0:
             self.init_equity = float(self.alpaca.get_account().equity)
@@ -87,7 +85,11 @@ class TradeAlgo:
             self.longAmount = self.currentEquity - self.shortAmount
 
             # Rebalancing portfolio on market open
-            if self.do_reb == "y":
+            openingTime = clock.next_open.replace(tzinfo=datetime.timezone.utc).timestamp()
+            currTime = clock.timestamp.replace(tzinfo=datetime.timezone.utc).timestamp()
+            timeSinceOpen = int((currTime - openingTime) / 60)
+            
+            if timeSinceOpen < 10:
                 tRebalance = threading.Thread(target=self.rebalance)
                 tRebalance.start()
                 tRebalance.join()
@@ -95,7 +97,6 @@ class TradeAlgo:
                 print("Skipped Initial Rebalance")
                 self.shortAmount = 0
                 self.longAmount = 0
-                self.do_reb = "y"
 
             d_reb = True
 
@@ -173,6 +174,8 @@ class TradeAlgo:
         clock = self.alpaca.get_clock()
         closeTime = clock.timestamp.replace(tzinfo=datetime.timezone.utc).timestamp()
 
+        sent_rep = False
+
         while(not isOpen):
             clock = self.alpaca.get_clock()
             openingTime = clock.next_open.replace(tzinfo=datetime.timezone.utc).timestamp()
@@ -183,9 +186,10 @@ class TradeAlgo:
             print("Time until market opens: [" + utils.p_time(timeToOpen) + "]")
       
             # 4 hours
-            if self.currentEquity > 0 and int(timeSinceClose / 60) == 4 and timeSinceClose % 60 == 0:
-                print("Sent Report!")
+            if int(timeSinceClose / 60) >= 4 and not sent_rep:
+                print("Sending a report!")
                 self.submitReport()
+                sent_rep = True
 
             time.sleep(60)
             isOpen = self.alpaca.get_clock().is_open
