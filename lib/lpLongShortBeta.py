@@ -85,6 +85,7 @@ class TradeAlgo:
             self.longAmount = self.currentEquity - self.shortAmount
 
             # Rebalancing portfolio on market open
+            clock = self.alpaca.get_clock()
             openingTime = clock.next_open.replace(tzinfo=datetime.timezone.utc).timestamp()
             currTime = clock.timestamp.replace(tzinfo=datetime.timezone.utc).timestamp()
             timeSinceOpen = int((currTime - openingTime) / 60)
@@ -148,10 +149,11 @@ class TradeAlgo:
                             p_message = "plumeted to the stop_loss point of " + str(self.stop_loss * 100)
                         print("Position " + str(position.symbol) + " has " + p_message + "%. Liquidating...")
 
-                        respSendBOLong = []
-                        tSendBOLong = threading.Thread(target=self.sendBatchOrder, args=[[position.symbol], [-m_p * int(float(position.qty))], respSendBOLong])
-                        tSendBOLong.start()
-                        tSendBOLong.join()
+                        print("Stop/Loss is currently DISABLED")
+                        # respSendBOLong = []
+                        # tSendBOLong = threading.Thread(target=self.sendBatchOrder, args=[[position.symbol], [-m_p * int(float(position.qty))], respSendBOLong])
+                        # tSendBOLong.start()
+                        # tSendBOLong.join()
 
                         # respSendBOLong is a list of booleans on if the order succeeded, we dont need to use it tho
                         for failed_stock in respSendBOLong[0][1]:
