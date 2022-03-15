@@ -58,8 +58,11 @@ class TradeAlgo:
         self.stop_loss = 0.05 # Close a trade if we lose money by 5%
         self.take_profit = 0.15 # Close a trade if we profit by 15%
         self.profit_margins = [] # List of bounds for each trade
+        self.do_stop_loss = False
         
         self.pdt_counter = 0
+        
+        self.do_init_reb = False
 
     def run(self):
         utils.p_error("NOTIFICATION: RUNNING A LOW-POWER LONG-SHORT ALGO")
@@ -85,12 +88,14 @@ class TradeAlgo:
             self.longAmount = self.currentEquity - self.shortAmount
 
             # Rebalancing portfolio on market open
-            clock = self.alpaca.get_clock()
-            openingTime = clock.next_open.replace(tzinfo=datetime.timezone.utc).timestamp()
-            currTime = clock.timestamp.replace(tzinfo=datetime.timezone.utc).timestamp()
-            timeSinceOpen = int((currTime - openingTime) / 60)
+            positions = self.alpaca.list_positions()
             
-            if timeSinceOpen < 10:
+            for position in positions:
+                if not (position.unrealized_plpc == position.unrealized_intraday_plpc):
+                    self.do_init_reb = True
+                    break
+            
+            if self.do_init_reb:
                 tRebalance = threading.Thread(target=self.rebalance)
                 tRebalance.start()
                 tRebalance.join()
@@ -140,7 +145,7 @@ class TradeAlgo:
                         m_p = -1
                     pctg_change = abs(float(position.unrealized_plpc)) * m_p
 
-                    if pctg_change > self.take_profit or pctg_change < -self.stop_loss:
+                    if (pctg_change > self.take_profit or pctg_change < -self.stop_loss) and self.do_stop_loss:
                         d_reb = True
 
                         # Time to exit the trade
@@ -149,11 +154,10 @@ class TradeAlgo:
                             p_message = "plumeted to the stop_loss point of " + str(self.stop_loss * 100)
                         print("Position " + str(position.symbol) + " has " + p_message + "%. Liquidating...")
 
-                        print("Stop/Loss is currently DISABLED")
-                        # respSendBOLong = []
-                        # tSendBOLong = threading.Thread(target=self.sendBatchOrder, args=[[position.symbol], [-m_p * int(float(position.qty))], respSendBOLong])
-                        # tSendBOLong.start()
-                        # tSendBOLong.join()
+                        respSendBOLong = []
+                        tSendBOLong = threading.Thread(target=self.sendBatchOrder, args=[[position.symbol], [-m_p * int(float(position.qty))], respSendBOLong])
+                        tSendBOLong.start()
+                        tSendBOLong.join()
 
                         # respSendBOLong is a list of booleans on if the order succeeded, we dont need to use it tho
                         for failed_stock in respSendBOLong[0][1]:
@@ -194,11 +198,13 @@ class TradeAlgo:
                 sent_rep = True
 
             time.sleep(60)
+            
             isOpen = self.alpaca.get_clock().is_open
 
             if isOpen:
-                # Do operations at 9:31 AM
-                time.sleep(60)
+                # Do operations at 9:35 AM
+                self.do_init_reb = True
+                time.sleep(60 * 5)
 
     # Update our profit margins stop-loss list on a new purchase
     def update_profits(self, stock, side):
@@ -296,6 +302,10 @@ class TradeAlgo:
                 else:
                     order_index = self.long.index(failed_stock)
                     self.longAmount = self.longAmount + abs(order_change * long_prices[order_index])
+
+    # An improved rebalance algo
+    def eq_rebalance(self):
+        pass
 
     # Rebalances our portfolio as the start of a day, and removes all old positions as a batch order
     def rebalance(self):
@@ -521,7 +531,7 @@ class TradeAlgo:
         positions = self.alpaca.list_positions()
         for position in positions:
             if position.symbol == stock:
-                if (side == "buy" and position.side == "short") or (side == "sell" and position.side == "long"):
+                if ((side == "buy" and position.side == "short") or (side == "sell" and position.side == "long")) and position.unrealized_plpc == position.unrealized_intraday_plpc:
                     pdt_qualified = True
                     self.pdt_counter = self.pdt_counter + 1
                 else:
@@ -555,7 +565,6 @@ class TradeAlgo:
             return bars[0].c
         except Exception as err:
             print("Unable to get price of " + stock)
-            raise err
 
     def getUsableEquity(self):
         return int(float(self.alpaca.get_account().equity) * self.equity_cash_ratio)
