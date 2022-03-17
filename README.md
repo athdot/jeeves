@@ -1,11 +1,11 @@
-# Jeeves v2.1.2 - "Zelenskyy"
+# Jeeves v2.2.1 - "Wagner"
 Python Auto-Trader with Alpaca API
 
 Compatable trading algorithms and scripts are stored in our lib/ folder
 
 ### Recent Version Notes
-- Changes of ```lpLongShortBeta.py``` to allow account to bypass PDT restrictions by flip-flopping between which stock universe is being currently processed. Stocks are held for 24 hrs (72 hours on the weekend). With the current setup, considering no stock goes outside the stop-loss points, PDT lockdown should be avoided.
-- Addition of a reporting system with MailJet API, additionally with the inclusion of charts etc
+- Implementation of a true 130/30 long-short algorithm ```lpLongShort.py```
+- Rebalancing changed to bucket model, where each stock is bought up to a certain percentage rather than equal positions
 
 ### Algorithm Creation
 
