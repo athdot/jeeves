@@ -58,7 +58,7 @@ class TradeAlgo:
         self.stop_loss = 0.05 # Close a trade if we lose money by 5%
         self.take_profit = 0.15 # Close a trade if we profit by 15%
         self.profit_margins = [] # List of bounds for each trade
-        self.do_stop_loss = False
+        self.do_stop_loss = True
         
         self.pdt_counter = 0
         
@@ -96,7 +96,7 @@ class TradeAlgo:
                     break
             
             if self.do_init_reb:
-                tRebalance = threading.Thread(target=self.rebalance)
+                tRebalance = threading.Thread(target=self.eq_rebalance)
                 tRebalance.start()
                 tRebalance.join()
             else:
@@ -305,7 +305,146 @@ class TradeAlgo:
 
     # An improved rebalance algo
     def eq_rebalance(self):
-        pass
+        tRerank = threading.Thread(target=self.rerank)
+        tRerank.start()
+        tRerank.join()
+        
+        remainingEquity = self.shortAmount + self.longAmount
+        self.longAmount = 0
+        self.shortAmount = 0
+        
+        # We have a list of stocks to long and to short
+        # Clear existing orders
+        orders = self.alpaca.list_orders(status="open")
+        for order in orders:
+            self.alpaca.cancel_order(order.id)
+
+        # Handle currently invested stonks from yesterday
+        positions = self.alpaca.list_positions()
+        
+        stock_list = [] # Stock name
+        stock_change = [] # Stock change
+
+        # Basically save our position changes in order to liquidate all our assets
+        for position in positions:
+            stock_list.append(position.symbol)
+            if position.side == "long":
+                stock_change.append(-abs(int(float(position.qty))))
+            else:
+                stock_change.append(abs(int(float(position.qty))))
+        
+        # Create a new list of how we want the new portfolio to look
+        # Using self.shortAmount & self.longAmount
+        stock_list_rb = []
+        stock_change_rb = []
+
+        short_prices = []
+        long_prices = []
+
+        # Get price numbers for shorts and longs
+        for stock in self.short:
+            short_prices.append(self.getStockPrice(stock))
+            stock_list_rb.append(stock)
+            stock_change_rb.append(0)
+        for stock in self.long:
+            long_prices.append(self.getStockPrice(stock))
+            stock_list_rb.append(stock)
+            stock_change_rb.append(0)
+
+        # Go through the stock index by trying to add percentages of leftover cash
+        pos_left = True
+        while pos_left:
+            # Formulate a stock list of stocks too expensive for our remaining capital
+            pos_left = False
+            exclude_list = []
+            
+            for i, stock in enumerate(self.short):
+                if remainingEquity - short_prices[i] <= 0 or position_cash - short_prices[i] <= 0:
+                    exclude_list.append(stock)
+            
+            for i, stock in enumerate(self.long):
+                if remainingEquity - long_prices[i] <= 0 or position_cash - long_prices[i] <= 0:
+                    exclude_list.append(stock)
+                    
+            universe_size = len(self.short) + len(self.long) - len(exclude_list)
+            position_cash = remainingEquity / universe_size
+            
+            for i, stock in enumerate(self.short):
+                if remainingEquity - short_prices[i] > 0 and position_cash - short_prices[i] > 0 and exclude_list.count(stock) == 0:
+                    pos_left = True
+                    
+                    num_pos = int(position_cash / short_prices[i])
+                    
+                    remainingEquity = remainingEquity - num_pos * short_prices[i]
+
+                    stock_list_index = stock_list_rb.index(stock)
+                    stock_change_rb[stock_list_index] = stock_change_rb[stock_list_index] - num_pos
+                    
+            for i, stock in enumerate(self.long):
+                if remainingEquity - long_prices[i] > 0 and position_cash - long_prices[i] > 0 and exclude_list.count(stock) == 0:
+                    pos_left = True
+                    
+                    num_pos = int(position_cash / long_prices[i])
+                    
+                    remainingEquity = remainingEquity - num_pos * long_prices[i]
+
+                    stock_list_index = stock_list_rb.index(stock)
+                    stock_change_rb[stock_list_index] = stock_change_rb[stock_list_index] + num_pos
+          
+        for i in range(0, 1):
+            position_list_p = []
+            
+            for j, qty in enumerate(stock_change_rb):
+                if (i * 2 - 1) * qty > 0:
+                    position_list_p.append(stock_list_rb[j])
+            
+            if i == 0:
+                print("We are taking a short position in: " + str(position_list_p))
+            else:
+                print("We are taking a long position in: " + str(position_list_p))
+
+        # Merge the 2 stock lists
+        for i, stock in enumerate(stock_list_rb):
+            if stock_list.count(stock) == 0:
+                # Stock isnt in stock_list, we will add
+                stock_list.append(stock)
+                stock_change.append(stock_change_rb[i])
+            else:
+                # Stock is in our list, so we have to modify the stock at the index
+                stock_index = stock_list.index(stock)
+                stock_change[stock_index] = stock_change[stock_index] + stock_change_rb[i]
+
+        # Remove stocks with a net change of 0
+        t_stock_list = stock_list
+        t_stock_change = stock_change
+        stock_list = []
+        stock_change = []
+        for i, stock in enumerate(t_stock_list):
+            if not (t_stock_change[i] == 0):
+                stock_list.append(stock)
+                stock_change.append(t_stock_change[i])
+
+        # Stock list is complete, we can batch order lol
+        respSendBOLong = []
+        tSendBOLong = threading.Thread(target=self.sendBatchOrder, args=[stock_list, stock_change, respSendBOLong])
+        tSendBOLong.start()
+        tSendBOLong.join()
+
+        # respSendBOLong is a list of booleans on if the order succeeded, we dont need to use it tho
+        for failed_stock in respSendBOLong[0][1]:
+            # Take every incomplete order and contribute monies to its specific short / long pool
+            self.blacklist.add(failed_stock)
+            stock_index = stock_list.index(failed_stock)
+            order_change = stock_change[stock_index]
+
+            if self.short.count(failed_stock) > 0:
+                order_index = self.short.index(failed_stock)
+                self.shortAmount = self.shortAmount + abs(order_change * short_prices[order_index])
+            elif self.long.count(failed_stock) > 0:
+                order_index = self.long.index(failed_stock)
+                self.longAmount = self.longAmount + abs(order_change * long_prices[order_index])
+        
+        
 
     # Rebalances our portfolio as the start of a day, and removes all old positions as a batch order
     def rebalance(self):
