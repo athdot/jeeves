@@ -278,66 +278,56 @@ class TradeAlgo:
             stock_list_rb.append(stock)
             stock_change_rb.append(0)
             
-        do_search = True
-        while do_search:
-            do_search = False
-            # Handle short list
-            temp_stock = []
-            
-            for i, stock in enumerate(self.short):
-                if short_prices[i] * 0.5 <= self.shortAmount:
-                    temp_stock.append(stock)
+        while True:
+            # Compile prices to find the current minimum price
+            price_list = []
+            for i, price in enumerate(short_prices):
+                change_index = stock_list_rb.index(self.short[i])
+                price_list.append(price * (-stock_change_rb[change_index] + 1))
+                
+            min_index = 0
+            for i, price in enumerate(price_list):
+                if price < price_list[min_index] and price <= self.shortAmount:
+                    min_index = i
                     
-            # Use temp_stock and create percentages, and skew distribution based on prediction
-            def_pctg = self.shortAmount / len(temp_stock)
-            for i, stock in enumerate(temp_stock):
-                # 1.5 to 0.5 slope
-                cash_pctg = def_pctg * (1.5 - i / (len(temp_stock) - 1))
+            if price_list[min_index] > self.shortAmount:
+                break
+            else:
+                self.shortAmount = self.shortAmount - price_list[min_index]
                 
-                num_pos = cash_pctg // short_prices[self.short.index(stock)]
-                if num_pos != 0:
-                    do_search = True
+                stock_list_index = stock_list_rb.index(self.short[min_index])
+                stock_change_rb[stock_list_index] = stock_change_rb[stock_list_index] - 1
+        
+        while True:
+            # Compile prices to find the current minimum price
+            price_list = []
+            for i, price in enumerate(long_prices):
+                change_index = stock_list_rb.index(self.long[i])
+                price_list.append(price * (stock_change_rb[change_index] + 1))
+                
+            min_index = 0
+            for i, price in enumerate(price_list):
+                if price < price_list[min_index] and price <= self.longAmount:
+                    min_index = i
                     
-                self.shortAmount = self.shortAmount - num_pos * short_prices[self.short.index(stock)]
+            if price_list[min_index] > self.longAmount:
+                break
+            else:
+                self.longAmount = self.longAmount - price_list[min_index]
                 
-                stock_list_index = stock_list_rb.index(stock)
-                stock_change_rb[stock_list_index] = stock_change_rb[stock_list_index] - num_pos
-
-        do_search = True
-        while do_search:
-            do_search = False
-            # Handle short list
-            temp_stock = []
-            
-            for i, stock in enumerate(self.long):
-                if long_prices[i] * 0.5 <= self.longAmount:
-                    temp_stock.append(stock)
-                    
-            # Use temp_stock and create percentages, and skew distribution based on prediction
-            def_pctg = self.longAmount / len(temp_stock)
-            for i, stock in enumerate(temp_stock):
-                # 1.5 to 0.5 slope
-                cash_pctg = def_pctg * (1.5 - i / (len(temp_stock) - 1))
-                
-                num_pos = cash_pctg // long_prices[self.long.index(stock)]
-                if num_pos != 0:
-                    do_search = True
-                    
-                self.longAmount = self.longAmount - num_pos * long_prices[self.long.index(stock)]
-                
-                stock_list_index = stock_list_rb.index(stock)
-                stock_change_rb[stock_list_index] = stock_change_rb[stock_list_index] + num_pos
-                
-        for i in range(0, 1):
+                stock_list_index = stock_list_rb.index(self.long[min_index])
+                stock_change_rb[stock_list_index] = stock_change_rb[stock_list_index] + 1
+        
+        for i in range(2):
             position_list_p = []
             
             for j, qty in enumerate(stock_change_rb):
                 if (i * 2 - 1) * qty > 0:
                     position_list_p.append(stock_list_rb[j])
             
-            if i == 0:
+            if i == 0 and len(position_list_p) > 0:
                 print("We are taking a short position in: " + str(position_list_p))
-            else:
+            elif len(position_list_p) > 0:
                 print("We are taking a long position in: " + str(position_list_p))
 
         # Merge the 2 stock lists

@@ -26,7 +26,7 @@ alternateStockUniverse = [
 ]
 
 # Algorithm name, no .py
-algorithm = "lpLongShortBeta"
+algorithm = "lpLongShort"
 
 def main():
     # Set our global python variables for all of our child scripts
