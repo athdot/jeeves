@@ -32,7 +32,6 @@ def main():
     # Set our global python variables for all of our child scripts
     utils.reset_log()
     init_alpaca_environ()
-    utils.print_header(algorithm + ".py") 
 
     # Run investment strategy
     algo = eval(algorithm).TradeAlgo()
