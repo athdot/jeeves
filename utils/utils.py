@@ -47,5 +47,9 @@ def p_time(timeToOpen):
             
     return "".join(time_list)
 
+def write_log(write_line, file_name = "log_file.txt"):
+    with open(file_name, 'a') as log_file:
+    log_file.write(str(write_line) + '\n')
+
 def synch_time():
     return
