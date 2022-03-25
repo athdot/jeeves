@@ -61,6 +61,7 @@ def reset_log(file_name = "log_file.txt"):
         log_file.truncate(0)
         
 def print_header(strat):
+    reset_log()
     alpaca = tradeapi.REST(os.environ["APCA_API_KEY_ID"],
                            os.environ["APCA_API_SECRET_KEY"],
                            os.environ["APCA_API_BASE_URL"],
