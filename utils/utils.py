@@ -65,22 +65,22 @@ def print_header(strat):
                            os.environ["APCA_API_BASE_URL"],
                            'v2')
     
-    utils.p_sep()
+    p_sep()
     
-    print("\nJEEVES")
+    write_log("\nJEEVES")
     
-    print(os.environ["JEEVES_VERSION"])
+    write_log(os.environ["JEEVES_VERSION"])
     
-    print("Automated Trading and Portfolio Management Script for the Raspberry PI")
-    print("© " + str(date.today().year) + ", Charles Graham. All rights reserved.")
+    write_log("Automated Trading and Portfolio Management Script for the Raspberry PI")
+    write_log("© " + str(date.today().year) + ", Charles Graham. All rights reserved.")
     
     total_equity = float(alpaca.get_account().equity)
     
-    print("\nFree Equity: $" + str(total_equity))
-    print("Day Trades: " + str(alpaca.get_account().daytrade_count))
-    print("\nAlgorithm: " + str(strat) + "\n")
+    write_log("\nFree Equity: $" + str(total_equity))
+    write_log("Day Trades: " + str(alpaca.get_account().daytrade_count))
+    write_log("\nAlgorithm: " + str(strat) + "\n")
     
-    utils.p_sep()
+    p_sep()
 
 def synch_time():
     return
