@@ -96,11 +96,7 @@ class TradeAlgo:
                     self.do_init_reb = True
                     break
             
-            if self.do_init_reb:
-                tRebalance = threading.Thread(target=self.rebalance)
-                tRebalance.start()
-                tRebalance.join()
-            else:
+            if not self.do_init_reb:
                 print("Skipped Initial Rebalance")
                 self.shortAmount = 0
                 self.longAmount = 0
@@ -139,6 +135,18 @@ class TradeAlgo:
                 # Check each position to see if it goes past our risk management values and liquidate & add to blacklist if so
                 # Stop-loss and take-profit points?
                 positions = self.alpaca.list_positions()
+
+                if (self.timeToClose // 60) % 10 == 0:
+                    s_all = 0
+                    l_all = 0
+                    for position in positions:
+                        if position.side == "long":
+                            l_all = l_all + float(position.market_value)
+                        else:
+                            s_all = s_all + float(position.market_value)
+                    print("Total Short Allocation: [" + str(s_all) + "]")
+                    print("Total Long Allocation: [" + str(l_all) + "]")
+                        
 
                 for position in positions:
                     m_p = 1
@@ -236,6 +244,10 @@ class TradeAlgo:
     
     # An improved rebalance algo
     def rebalance(self):
+        if self.longAmount > 0 or self.shortAmount > 0:
+            print("Short Balance [" + str(self.shortAmount) + "]")
+            print("Long Balance [" + str(self.longAmount) + "]")
+        
         tRerank = threading.Thread(target=self.rerank)
         tRerank.start()
         tRerank.join()
@@ -253,12 +265,19 @@ class TradeAlgo:
         stock_change = [] # Stock change
 
         # Basically save our position changes in order to liquidate all our assets
+        do_rebalance = False
         for position in positions:
-            stock_list.append(position.symbol)
-            if position.side == "long":
-                stock_change.append(-abs(int(float(position.qty))))
-            else:
-                stock_change.append(abs(int(float(position.qty))))
+            if not (position.unrealized_plpc == position.unrealized_intraday_plpc):
+                do_rebalance = True
+                break
+        
+        if do_rebalance:
+            for position in positions:
+                stock_list.append(position.symbol)
+                if position.side == "long":
+                    stock_change.append(-abs(int(float(position.qty))))
+                else:
+                    stock_change.append(abs(int(float(position.qty))))
         
         # Create a new list of how we want the new portfolio to look
         # Using self.shortAmount & self.longAmount
@@ -278,12 +297,13 @@ class TradeAlgo:
             stock_list_rb.append(stock)
             stock_change_rb.append(0)
             
+
         while True:
             # Compile prices to find the current minimum price
             price_list = []
             for i, price in enumerate(short_prices):
                 change_index = stock_list_rb.index(self.short[i])
-                price_list.append(price * (-stock_change_rb[change_index] + 1))
+                price_list.append(price * (abs(stock_change_rb[change_index]) + 1))
                 
             min_index = 0
             for i, price in enumerate(price_list):
@@ -293,7 +313,7 @@ class TradeAlgo:
             if price_list[min_index] > self.shortAmount:
                 break
             else:
-                self.shortAmount = self.shortAmount - price_list[min_index]
+                self.shortAmount = self.shortAmount - abs(short_prices[min_index])
                 
                 stock_list_index = stock_list_rb.index(self.short[min_index])
                 stock_change_rb[stock_list_index] = stock_change_rb[stock_list_index] - 1
@@ -303,7 +323,7 @@ class TradeAlgo:
             price_list = []
             for i, price in enumerate(long_prices):
                 change_index = stock_list_rb.index(self.long[i])
-                price_list.append(price * (stock_change_rb[change_index] + 1))
+                price_list.append(price * (abs(stock_change_rb[change_index]) + 1))
                 
             min_index = 0
             for i, price in enumerate(price_list):
@@ -313,7 +333,7 @@ class TradeAlgo:
             if price_list[min_index] > self.longAmount:
                 break
             else:
-                self.longAmount = self.longAmount - price_list[min_index]
+                self.longAmount = self.longAmount - abs(long_prices[min_index])
                 
                 stock_list_index = stock_list_rb.index(self.long[min_index])
                 stock_change_rb[stock_list_index] = stock_change_rb[stock_list_index] + 1
