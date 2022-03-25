@@ -30,8 +30,9 @@ algorithm = "lpLongShort"
 
 def main():
     # Set our global python variables for all of our child scripts
+    utils.reset_log()
     init_alpaca_environ()
-    print_header(algorithm + ".py") 
+    utils.print_header(algorithm + ".py") 
 
     # Run investment strategy
     algo = eval(algorithm).TradeAlgo()
@@ -66,29 +67,6 @@ def init_alpaca_environ():
     
 def existant_algo(name):
     return exists("lib/" + name + ".py")
-
-def print_header(strat):
-    alpaca = tradeapi.REST(os.environ["APCA_API_KEY_ID"],
-                           os.environ["APCA_API_SECRET_KEY"],
-                           os.environ["APCA_API_BASE_URL"],
-                           'v2')
-    
-    utils.p_sep()
-    
-    print("\nJEEVES")
-    
-    print(os.environ["JEEVES_VERSION"])
-    
-    print("Automated Trading and Portfolio Management Script for the Raspberry PI")
-    print("© " + str(date.today().year) + ", Charles Graham. All rights reserved.")
-    
-    total_equity = float(alpaca.get_account().equity)
-    
-    print("\nFree Equity: $" + str(total_equity))
-    print("Day Trades: " + str(alpaca.get_account().daytrade_count))
-    print("\nAlgorithm: " + str(strat) + "\n")
-    
-    utils.p_sep()
 
 if existant_algo(algorithm):
     main()
