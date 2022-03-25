@@ -76,11 +76,9 @@ class TradeAlgo:
         # Run each day
         while True:
             # Await the market open
-            utils.write_log("Waiting for market to open...")
             tAMO = threading.Thread(target=self.awaitMarketOpen)
             tAMO.start()
             tAMO.join()
-            utils.write_log("Market opened.")
 
             # Refresh equity totals
             self.currentEquity = self.getUsableEquity()
@@ -191,9 +189,6 @@ class TradeAlgo:
 
         sent_rep = False
         
-        if isOpen:
-            utils.print_header("lpLongShort.py") 
-        
         utils.write_log("Waiting for market to open...")   
 
         while(not isOpen):
@@ -221,6 +216,7 @@ class TradeAlgo:
                 # Do operations at 9:35 AM
                 self.do_init_reb = True
                 time.sleep(60 * 5)
+        utils.write_log("Market opened.")
 
     # Update our profit margins stop-loss list on a new purchase
     def update_profits(self, stock, side):
