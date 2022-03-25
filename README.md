@@ -1,4 +1,4 @@
-# Jeeves v2.2.1 - "Wagner"
+# Jeeves v2.3.0 - "Wagner"
 Python Auto-Trader with Alpaca API
 
 Compatable trading algorithms and scripts are stored in our lib/ folder
@@ -6,6 +6,7 @@ Compatable trading algorithms and scripts are stored in our lib/ folder
 ### Recent Version Notes
 - Implementation of a true 130/30 long-short algorithm ```lpLongShort.py```
 - Rebalancing changed to bucket model, where each stock is bought up to a certain percentage rather than equal positions
+- Output printed in operation to a file ```log_file.txt```
 
 ### Algorithm Creation
 
