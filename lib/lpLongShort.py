@@ -66,6 +66,7 @@ class TradeAlgo:
         self.do_init_reb = False
 
     def run(self):
+        utils.print_header("lpLongShort.py") 
         utils.p_error("NOTIFICATION: RUNNING A LOW-POWER LONG-SHORT ALGO")
         utils.p_sep()
 
@@ -210,6 +211,8 @@ class TradeAlgo:
             isOpen = self.alpaca.get_clock().is_open
 
             if isOpen:
+                utils.print_header("lpLongShort.py") 
+                
                 # Do operations at 9:35 AM
                 self.do_init_reb = True
                 time.sleep(60 * 5)
