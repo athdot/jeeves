@@ -55,6 +55,29 @@ def write_log(write_line, file_name = "log_file.txt"):
 def reset_log(file_name = "log_file.txt"):
     with open(file_name, 'r+') as log_file:
         log_file.truncate(0)
+        
+def print_header(strat):
+    alpaca = tradeapi.REST(os.environ["APCA_API_KEY_ID"],
+                           os.environ["APCA_API_SECRET_KEY"],
+                           os.environ["APCA_API_BASE_URL"],
+                           'v2')
+    
+    utils.p_sep()
+    
+    print("\nJEEVES")
+    
+    print(os.environ["JEEVES_VERSION"])
+    
+    print("Automated Trading and Portfolio Management Script for the Raspberry PI")
+    print("© " + str(date.today().year) + ", Charles Graham. All rights reserved.")
+    
+    total_equity = float(alpaca.get_account().equity)
+    
+    print("\nFree Equity: $" + str(total_equity))
+    print("Day Trades: " + str(alpaca.get_account().daytrade_count))
+    print("\nAlgorithm: " + str(strat) + "\n")
+    
+    utils.p_sep()
 
 def synch_time():
     return
