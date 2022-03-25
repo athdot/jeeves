@@ -190,6 +190,11 @@ class TradeAlgo:
         closeTime = clock.timestamp.replace(tzinfo=datetime.timezone.utc).timestamp()
 
         sent_rep = False
+        
+        if isOpen:
+            utils.print_header("lpLongShort.py") 
+        
+        utils.write_log("Waiting for market to open...")   
 
         while(not isOpen):
             clock = self.alpaca.get_clock()
