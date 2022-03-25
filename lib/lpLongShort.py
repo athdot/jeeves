@@ -75,11 +75,11 @@ class TradeAlgo:
         # Run each day
         while True:
             # Await the market open
-            print("Waiting for market to open...")
+            utils.write_log("Waiting for market to open...")
             tAMO = threading.Thread(target=self.awaitMarketOpen)
             tAMO.start()
             tAMO.join()
-            print("Market opened.")
+            utils.write_log("Market opened.")
 
             # Refresh equity totals
             self.currentEquity = self.getUsableEquity()
@@ -97,7 +97,7 @@ class TradeAlgo:
                     break
             
             if not self.do_init_reb:
-                print("Skipped Initial Rebalance")
+                utils.write_log("Skipped Initial Rebalance")
                 self.shortAmount = 0
                 self.longAmount = 0
 
@@ -112,16 +112,16 @@ class TradeAlgo:
 
                 if(self.timeToClose < (60 * 5)):
                     # Go to next day
-                    print("Sleeping until market close (5 minutes).")
+                    utils.write_log("Sleeping until market close (5 minutes).")
                     time.sleep(60 * 5)
                 
                     self.opening = True
-                    print("Market Close: " + str(clock.timestamp).split()[0])
+                    utils.write_log("Market Close: " + str(clock.timestamp).split()[0])
                     utils.p_sep()
                     self.var_init()
                     break
 
-                print("Time until market close: [" + utils.p_time(int((closingTime - currTime) / 60)) + "]")
+                utils.write_log("Time until market close: [" + utils.p_time(int((closingTime - currTime) / 60)) + "]")
 
                 # Invest free cash
                 if d_reb:
@@ -144,8 +144,8 @@ class TradeAlgo:
                             l_all = l_all + float(position.market_value)
                         else:
                             s_all = s_all + float(position.market_value)
-                    print("Total Short Allocation: [" + str(s_all) + "]")
-                    print("Total Long Allocation: [" + str(l_all) + "]")
+                    utils.write_log("Total Short Allocation: [" + str(s_all) + "]")
+                    utils.write_log("Total Long Allocation: [" + str(l_all) + "]")
                         
 
                 for position in positions:
@@ -161,7 +161,7 @@ class TradeAlgo:
                         p_message = "exceeded the take_profit point of " + str(self.take_profit * 100)
                         if pctg_change < self.stop_loss:
                             p_message = "plumeted to the stop_loss point of " + str(self.stop_loss * 100)
-                        print("Position " + str(position.symbol) + " has " + p_message + "%. Liquidating...")
+                        utils.write_log("Position " + str(position.symbol) + " has " + p_message + "%. Liquidating...")
 
                         respSendBOLong = []
                         tSendBOLong = threading.Thread(target=self.sendBatchOrder, args=[[position.symbol], [-m_p * int(float(position.qty))], respSendBOLong])
@@ -197,11 +197,11 @@ class TradeAlgo:
             timeToOpen = int((openingTime - currTime) / 60)
             timeSinceClose = int((currTime - closeTime) / 60)
             
-            print("Time until market opens: [" + utils.p_time(timeToOpen) + "]")
+            utils.write_log("Time until market opens: [" + utils.p_time(timeToOpen) + "]")
       
             # 4 hours
             if int(timeSinceClose / 60) >= 4 and not sent_rep:
-                print("Sending a report!")
+                utils.write_log("Sending a report!")
                 self.submitReport()
                 sent_rep = True
 
@@ -245,8 +245,8 @@ class TradeAlgo:
     # An improved rebalance algo
     def rebalance(self):
         if self.longAmount > 0 or self.shortAmount > 0:
-            print("Short Balance [" + str(self.shortAmount) + "]")
-            print("Long Balance [" + str(self.longAmount) + "]")
+            utils.write_log("Short Balance [" + str(self.shortAmount) + "]")
+            utils.write_log("Long Balance [" + str(self.longAmount) + "]")
         
         tRerank = threading.Thread(target=self.rerank)
         tRerank.start()
@@ -346,9 +346,9 @@ class TradeAlgo:
                     position_list_p.append(stock_list_rb[j])
             
             if i == 0 and len(position_list_p) > 0:
-                print("We are taking a short position in: " + str(position_list_p))
+                utils.write_log("We are taking a short position in: " + str(position_list_p))
             elif len(position_list_p) > 0:
-                print("We are taking a long position in: " + str(position_list_p))
+                utils.write_log("We are taking a long position in: " + str(position_list_p))
 
         # Merge the 2 stock lists
         for i, stock in enumerate(stock_list_rb):
@@ -465,20 +465,20 @@ class TradeAlgo:
         # my_acc.daytrade_count
         if self.pdt_counter >= 2 and my_acc.daytrade_count >= 3 and not self.allow_liquidations:
             # ALMOST MARKED AS PDT, NONO
-            print("Pushing up against PDT restrictions | " + str(qty) + " " + stock + " " + side + " | not completed.")
+            utils.write_log("Pushing up against PDT restrictions | " + str(qty) + " " + stock + " " + side + " | not completed.")
             resp.append(True)
             return
 
         if(qty > 0):
             try:
                 self.alpaca.submit_order(stock, qty, side, "market", "day")
-                print("Market order of | " + str(qty) + " " + stock + " " + side + " | completed.")
+                utils.write_log("Market order of | " + str(qty) + " " + stock + " " + side + " | completed.")
                 resp.append(True)
             except:
-                print("Order of | " + str(qty) + " " + stock + " " + side + " | did not go through.")
+                utils.write_log("Order of | " + str(qty) + " " + stock + " " + side + " | did not go through.")
                 resp.append(False)
         else:
-            print("Quantity is 0, order of | " + str(qty) + " " + stock + " " + side + " | not completed.")
+            utils.write_log("Quantity is 0, order of | " + str(qty) + " " + stock + " " + side + " | not completed.")
             resp.append(True)
 
     def getStockPrice(self, stock):
@@ -489,7 +489,7 @@ class TradeAlgo:
                                             adjustment='raw')
             return bars[0].c
         except Exception as err:
-            print("Unable to get price of " + stock)
+            utils.write_log("Unable to get price of " + stock)
 
     def getUsableEquity(self):
         return int(float(self.alpaca.get_account().equity) * self.equity_cash_ratio)
