@@ -1,5 +1,6 @@
 import alpaca_trade_api as tradeapi
 import os
+from datetime import date
 
 # Utilities
 
