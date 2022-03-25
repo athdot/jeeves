@@ -16,11 +16,11 @@ def p_error(printErr):
         if len(line) < sub_len:
             for j in range(len(line), sub_len):
                 line = line + " "
-        print(error_notif + " " + line + " " + error_notif)
+        write_log(error_notif + " " + line + " " + error_notif)
         i = dist
     
 def p_sep():
-    print(horiz_seperator)
+    write_log(horiz_seperator)
     
 def p_time(timeToOpen):
     time_list = []
@@ -51,6 +51,10 @@ def write_log(write_line, file_name = "log_file.txt"):
     print(write_line)
     with open(file_name, 'a') as log_file:
         log_file.write(str(write_line) + '\n')
+        
+def reset_log(file_name = "log_file.txt"):
+    with open(file_name, 'r+') as log_file:
+        log_file.truncate(0)
 
 def synch_time():
     return
