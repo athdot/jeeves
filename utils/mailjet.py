@@ -3,6 +3,7 @@ from mailjet_rest import Client
 import os
 import alpaca_trade_api as tradeapi
 from utils import charts
+import base64
 
 email_html = "utils/mailjet/email.html"
 
@@ -222,6 +223,15 @@ def mailjet_send(html_text, d_t, cid1):
     api_secret = os.environ['MAILJET_API_SECRET_KEY']
     sender = os.environ["MAILJET_API_SENDER"]
     reciever = os.environ["MAILJET_API_RECIEVER"]
+
+    log_file = ""
+
+    try:
+        log_file = open("log_file.txt", "r").read()
+    except:
+        log_file = ""
+    encoded_log = base64.b64encode(log_file.encode("utf-8")).decode("utf-8")
+
     mailjet = Client(auth=(api_key, api_secret), version='v3.1')
     data = {
         'Messages': [
@@ -239,6 +249,13 @@ def mailjet_send(html_text, d_t, cid1):
 						"Subject": "RPi Daily Report - " + d_t,
 						"TextPart": "Daily Report from RPi",
 						"HTMLPart": html_text,
+						"Attachments": [
+								{
+										"ContentType": "text/plain",
+										"Filename": "log_file.txt",
+										"Base64Content": encoded_log
+								}
+						],
 						"InlinedAttachments": [
 								{
 										"ContentType": "image/png",
