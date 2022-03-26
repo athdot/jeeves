@@ -4,3 +4,4 @@ utils/__pycache__/
 utils/mailjet/__pycache__/
 params.json
 log_file.txt
+nohup.out
