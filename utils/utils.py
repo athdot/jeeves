@@ -1,5 +1,6 @@
 import alpaca_trade_api as tradeapi
 import os
+from os.path import exists
 from datetime import date
 
 # Utilities
@@ -57,8 +58,9 @@ def write_log(write_line, file_name = "log_file.txt"):
         log_file.write(str(write_line) + '\n')
         
 def reset_log(file_name = "log_file.txt"):
-    with open(file_name, 'r+') as log_file:
-        log_file.truncate(0)
+    if exists(file_name):
+        with open(file_name, 'r+') as log_file:
+            log_file.truncate(0)
         
 def print_header(strat):
     reset_log()
