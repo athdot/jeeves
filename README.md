@@ -1,4 +1,4 @@
-# Jeeves v2.3.0 - "Wagner"
+# Jeeves v2.3.0 - "Wagner"  [DEPRICIATED]
 Python Auto-Trader with Alpaca API
 
 Compatable trading algorithms and scripts are stored in our lib/ folder
